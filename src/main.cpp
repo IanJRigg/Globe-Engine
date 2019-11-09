@@ -453,56 +453,54 @@ void chapter_9()
     Input_Controller input_controller;
     window.register_input_controller(input_controller);
 
-    // Buffer_Controller buffer_controller;
-    // buffer_controller.bind();
-    // buffer_controller.load_array_buffer(cube_vertices);
-    // buffer_controller.set_array_attribute(0, 3, 0);
-    // buffer_controller.set_array_attribute(1, 3, 3);
-    // buffer_controller.set_array_attribute(2, 2, 6);
+    Buffer_Controller buffer_controller;
+    buffer_controller.bind();
+    buffer_controller.load_array_buffer(cube_vertices);
+    buffer_controller.set_array_attribute(0, 3, 0);
+    buffer_controller.set_array_attribute(1, 3, 3);
+    buffer_controller.set_array_attribute(2, 2, 6);
 
-    // Texture_2D texture;
-    // texture.bind();
-    // texture.load_jpg("textures/container.jpg");
-    // texture.set_s_axis_to_repeat();
-    // texture.set_t_axis_to_repeat();
-    // texture.set_minifying_filter_to_nearest();
-    // texture.set_magnifying_filter_to_nearest();
+    Texture_2D texture;
+    texture.bind();
+    texture.load_jpg("textures/container.jpg");
+    texture.set_s_axis_to_repeat();
+    texture.set_t_axis_to_repeat();
+    texture.set_minifying_filter_to_nearest();
+    texture.set_magnifying_filter_to_nearest();
 
-    // Program program;
-    // program.load_vertex_shader("shaders/vertex/ex-9.vert");
-    // program.load_fragment_shader("shaders/fragment/ex-9.frag");
-    // program.link();
+    Program program;
+    program.load_vertex_shader("shaders/vertex/ex-9.vert");
+    program.load_fragment_shader("shaders/fragment/ex-9.frag");
+    program.link();
 
-    // program.use();
+    program.use();
 
-    // program.set_uniform_integer("texture1", 0);
+    program.set_uniform_integer("texture1", 0);
 
-    // Input_Controller input_controller;
+    glm::mat4 transformation(1.0f);
 
-    // glm::mat4 transformation(1.0f);
+    glm::vec3 x_axis(1.0f, 0.0f, 0.0f);
+    glm::vec3 y_axis(0.0f, 1.0f, 0.0f);
+    glm::vec3 rotation_axis(0.0f, 0.0f, 0.0f);
+    glm::mat4 rotation(1.0f);
 
-    // glm::vec3 x_axis(1.0f, 0.0f, 0.0f);
-    // glm::vec3 y_axis(0.0f, 1.0f, 0.0f);
-    // glm::vec3 rotation_axis(0.0f, 0.0f, 0.0f);
-    // glm::mat4 rotation(1.0f);
+    glm::mat4 scale(1.0f);
+    glm::mat4 model(1.0f);
 
-    // glm::mat4 scale(1.0f);
-    // glm::mat4 model(1.0f);
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
 
-    // glm::mat4 view = glm::lookAt(
-    //     glm::vec3(0.0f, 0.0f, 2.0f),
-    //     glm::vec3(0.0f, 0.0f, 0.0f),
-    //     glm::vec3(0.0f, 1.0f, 0.0f)
-    // );
+    float fov = 45.0f;
+    glm::mat4 projection = glm::perspective(glm::radians(fov), (4.0f/3.0f), 0.1f, 100.0f);
 
-    // float fov = 45.0f;
-    // glm::mat4 projection = glm::perspective(glm::radians(fov), (4.0f/3.0f), 0.1f, 100.0f);
+    glm::mat4 mvp(1.0f);
 
-    // glm::mat4 mvp(1.0f);
+    float rotation_angle = 0.0f;
 
-    // float rotation_angle = 0.0f;
-
-    // bool left_click_is_being_held_down = false;
+    bool left_click_is_being_held_down = false;
 
     while(no_signals_have_been_raised())
     {
@@ -513,73 +511,61 @@ void chapter_9()
 
         window.poll_input();
 
-        // if(input_controller.left_mouse_button_is_pressed())
-        // {
-        //     if(left_click_is_being_held_down)
-        //     {
-        //         std::cout << "Holding" << std::endl;
-        //         //rotation_axis.x = input_controller.mouse_x_input();
-        //         //rotation_axis.y = input_controller.mouse_y_input();
-        //         if(/*input_controller.mouse_x_input() ||*/ input_controller.mouse_y_input())
-        //         {
-        //             rotation_angle += input_controller.mouse_y_input();
-        //             if(rotation_angle >= 360.0f || rotation_angle <= -360.0f)
-        //             {
-        //                 rotation_angle = 0.0f;
-        //             }
+        if(input_controller.left_mouse_button_is_pressed())
+        {
+            std::cout << "Holding" << std::endl;
+            //rotation_axis.x = input_controller.mouse_x_input();
+            //rotation_axis.y = input_controller.mouse_y_input();
+            if(/*input_controller.mouse_x_input() ||*/ input_controller.mouse_y_input())
+            {
+                rotation_angle += input_controller.mouse_y_input();
+                if(rotation_angle >= 360.0f || rotation_angle <= -360.0f)
+                {
+                    rotation_angle = 0.0f;
+                }
 
-        //             rotation = glm::rotate(rotation, glm::radians(rotation_angle), x_axis);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         std::cout << "First click" << std::endl;
-        //         left_click_is_being_held_down = true;
-        //     }
-        // }
-        // else
-        // {
-        //     left_click_is_being_held_down = false;
-        // }
+                rotation = glm::rotate(rotation, glm::radians(rotation_angle), x_axis);
+            }
+        }
 
-        // if(input_controller.up_key_is_pressed())
-        // {
-        //     rotation = glm::rotate(rotation, glm::radians(5.0f), x_axis);
-        // }
+        if(input_controller.up_key_is_pressed())
+        {
+            rotation = glm::rotate(rotation, glm::radians(5.0f), x_axis);
+        }
 
-        // if(input_controller.down_key_is_pressed())
-        // {
-        //     rotation = glm::rotate(rotation, glm::radians(-5.0f), x_axis);
-        // }
+        if(input_controller.down_key_is_pressed())
+        {
+            rotation = glm::rotate(rotation, glm::radians(-5.0f), x_axis);
+        }
 
-        // if(input_controller.right_key_is_pressed())
-        // {
-        //     rotation = glm::rotate(rotation, glm::radians(-5.0f), y_axis);
-        // }
+        if(input_controller.right_key_is_pressed())
+        {
+            rotation = glm::rotate(rotation, glm::radians(-5.0f), y_axis);
+        }
 
-        // if(input_controller.left_key_is_pressed())
-        // {
-        //     rotation = glm::rotate(rotation, glm::radians(5.0f), y_axis);
-        // }
+        if(input_controller.left_key_is_pressed())
+        {
+            rotation = glm::rotate(rotation, glm::radians(5.0f), y_axis);
+        }
 
         // Start rendering
         window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
         window.clear_buffer_bits();
 
-        // texture.set_active_texture(GL_TEXTURE0);
-        // texture.bind();
+        texture.set_active_texture(GL_TEXTURE0);
+        texture.bind();
 
-        // program.use();
+        program.use();
 
-        // projection = glm::perspective(glm::radians(fov), (4.0f/3.0f), 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (4.0f/3.0f), 0.1f, 100.0f);
 
-        // model = transformation * rotation * scale;
-        // mvp = projection * view * model;
+        model = transformation * rotation * scale;
+        mvp = projection * view * model;
 
-        // program.set_uniform_mat4("mvp", mvp);
+        program.set_uniform_mat4("mvp", mvp);
 
-        // buffer_controller.bind();
-        // buffer_controller.draw();
+        buffer_controller.bind();
+        buffer_controller.draw();
 
         window.swap_buffers();
     }

@@ -43,22 +43,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 /**********************************************************************************************//**
  * \brief
  * \param window
- * \param codepoint
- *************************************************************************************************/
-static void character_callback(GLFWwindow* window, unsigned int codepoint)
-{
-    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
-    if(input_controller == nullptr)
-    {
-        std::terminate();
-    }
-
-    input_controller->handle_character_event(codepoint);
-}
-
-/**********************************************************************************************//**
- * \brief
- * \param window
  * \param xpos
  * \param ypos
  *************************************************************************************************/
@@ -152,7 +136,6 @@ Window::Window(const std::string& title, const uint32_t height, const uint32_t w
 
     // Input callbacks
     glfwSetKeyCallback(m_window_pointer, key_callback);
-    glfwSetCharCallback(m_window_pointer, character_callback);
     glfwSetCursorPosCallback(m_window_pointer, cursor_position_callback);
     glfwSetMouseButtonCallback(m_window_pointer, mouse_button_callback);
 

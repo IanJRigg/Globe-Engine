@@ -1,6 +1,9 @@
 #include "input-controller.h"
 
 #include <exception>
+#include <iostream>
+
+#include <glfw/glfw3.h>
 
 /**********************************************************************************************//**
  * \brief Defult constructor
@@ -19,15 +22,7 @@ Input_Controller::Input_Controller() :
 /**********************************************************************************************//**
  * \brief Move assignment constructor
  *************************************************************************************************/
-void Input_Controller::handle_key_event(int key, int scancode, int action, int mods)
-{
-
-}
-
-/**********************************************************************************************//**
- * \brief Move assignment constructor
- *************************************************************************************************/
-void Input_Controller::handle_character_event(unsigned int codepoint)
+void Input_Controller::handle_key_event(int key, int scancode, int action, int)
 {
 
 }
@@ -37,22 +32,41 @@ void Input_Controller::handle_character_event(unsigned int codepoint)
  *************************************************************************************************/
 void Input_Controller::handle_cursor_position_event(double xpos, double ypos)
 {
+    m_old_mouse_x_position = m_mouse_x_position;
+    m_old_mouse_y_position = m_mouse_y_position;
 
+    m_mouse_x_position = xpos;
+    m_mouse_y_position = ypos;
 }
 
 /**********************************************************************************************//**
  * \brief Move assignment constructor
  *************************************************************************************************/
-void Input_Controller::handle_mouse_button_event(int button, int action, int mods)
+void Input_Controller::handle_mouse_button_event(int button, int action, int)
 {
-
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        m_left_mouse_button_is_pressed = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        m_left_mouse_button_is_pressed = false;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+        m_right_mouse_button_is_pressed = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+    {
+        m_right_mouse_button_is_pressed = true;
+    }
 }
 
 /**********************************************************************************************//**
  * \brief  Accessor for the mouse's x position
  * \return The value in m_mouse_position_x
  *************************************************************************************************/
-int32_t Input_Controller::mouse_x_position() const
+double Input_Controller::mouse_x_position() const
 {
     return m_mouse_x_position;
 }
@@ -61,7 +75,7 @@ int32_t Input_Controller::mouse_x_position() const
  * \brief  Accessor for the mouse's y position
  * \return The value in m_mouse_position_y
  *************************************************************************************************/
-int32_t Input_Controller::mouse_y_position() const
+double Input_Controller::mouse_y_position() const
 {
     return m_mouse_y_position;
 }
@@ -124,14 +138,14 @@ bool Input_Controller::right_key_is_pressed() const
  * \brief  Checks if the mouse has move in the x direction
  * \return -1 if mouse has moved left, 1 if mouse has moved right, and 0 if it hasn't changed
  *************************************************************************************************/
-float Input_Controller::mouse_x_input() const
+double Input_Controller::mouse_x_input() const
 {
-    int32_t difference = m_mouse_x_position - m_old_mouse_x_position;
-    if(difference >= 1L)
+    double difference = m_mouse_x_position - m_old_mouse_x_position;
+    if(difference >= 1.0f)
     {
         return 0.1f;
     }
-    else if(difference <= -1L)
+    else if(difference <= -1.0f)
     {
         return -0.1f;
     }
@@ -145,14 +159,14 @@ float Input_Controller::mouse_x_input() const
  * \brief  Checks if the mouse has move in the y direction
  * \return -1 if mouse has moved down, 1 if mouse has moved up, and 0 if it hasn't changed
  *************************************************************************************************/
-float Input_Controller::mouse_y_input() const
+double Input_Controller::mouse_y_input() const
 {
-    int32_t difference = m_mouse_y_position - m_old_mouse_y_position;
-    if(difference >= 1L)
+    double difference = m_mouse_y_position - m_old_mouse_y_position;
+    if(difference >= 1.0f)
     {
         return 0.1f;
     }
-    else if(difference <= -1L)
+    else if(difference <= -1.0f)
     {
         return -0.1f;
     }

@@ -17,14 +17,13 @@ public:
 
 // Mutator functions
     void handle_key_event(int key, int scancode, int action, int mods);
-    void handle_character_event(unsigned int codepoint);
     void handle_cursor_position_event(double xpos, double ypos);
     void handle_mouse_button_event(int button, int action, int mods);
 
 // Accessor functions
     // Mouse Position
-    int32_t mouse_x_position() const;
-    int32_t mouse_y_position() const;
+    double mouse_x_position() const;
+    double mouse_y_position() const;
 
     // Mouse buttons
     bool left_mouse_button_is_pressed() const;
@@ -37,8 +36,8 @@ public:
     bool right_key_is_pressed() const;
 
     // Mouse Motion
-    float mouse_x_input() const;
-    float mouse_y_input() const;
+    double mouse_x_input() const;
+    double mouse_y_input() const;
 
     // Whitespace keys
     bool tab_key_is_pressed() const;
@@ -284,18 +283,15 @@ private:
     void clear_input_map();
 
 private:
-    // Window State
-    bool m_quit_button_is_pressed;
-
     // Mouse Button State
     bool m_left_mouse_button_is_pressed;
     bool m_right_mouse_button_is_pressed;
 
-    int32_t m_old_mouse_x_position;
-    int32_t m_old_mouse_y_position;
+    double m_old_mouse_x_position;
+    double m_old_mouse_y_position;
 
-    int32_t m_mouse_x_position;
-    int32_t m_mouse_y_position;
+    double m_mouse_x_position;
+    double m_mouse_y_position;
 };
 
 #endif
