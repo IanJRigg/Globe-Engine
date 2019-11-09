@@ -4,7 +4,9 @@
 #include <cstdint>
 #include <string>
 
+// Forward Declarations
 struct GLFWwindow;
+class Input_Controller;
 
 class Window
 {
@@ -20,6 +22,7 @@ public:
     Window& operator=(Window&& other) noexcept;
 
     void poll_input();
+    void register_input_controller(Input_Controller& input_controller);
 
     void swap_buffers() const;
     void clear_color(const float red,

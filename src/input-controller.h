@@ -10,22 +10,22 @@ public:
     virtual ~Input_Controller() = default;
 
     Input_Controller(Input_Controller& other) = delete;
-    Input_Controller(Input_Controller&& other) noexcept;
+    Input_Controller(Input_Controller&& other) noexcept = delete;
 
     Input_Controller& operator=(Input_Controller& other) = delete;
-    Input_Controller& operator=(Input_Controller&& other) noexcept;
+    Input_Controller& operator=(Input_Controller&& other) noexcept = delete;
 
-    void process_input();
+// Mutator functions
+    void handle_key_event(int key, int scancode, int action, int mods);
+    void handle_character_event(unsigned int codepoint);
+    void handle_cursor_position_event(double xpos, double ypos);
+    void handle_mouse_button_event(int button, int action, int mods);
 
-    // System Levlel Inputs
-    bool quit_was_pressed() const;
-
+// Accessor functions
     // Mouse Position
     int32_t mouse_x_position() const;
     int32_t mouse_y_position() const;
 
-
-// Key Pressed
     // Mouse buttons
     bool left_mouse_button_is_pressed() const;
     bool right_mouse_button_is_pressed() const;

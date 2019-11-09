@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "input-controller.h"
+
 /**********************************************************************************************//**
  * \brief
  * \param window
@@ -27,9 +29,15 @@ static void framebuffer_size_callback(GLFWwindow*, int width, int height)
  * \param action
  * \param mods
  *************************************************************************************************/
-static void key_callback(GLFWwindow*, int key, int scancode, int action, int mods)
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
+    if(input_controller == nullptr)
+    {
+        std::terminate();
+    }
 
+    input_controller->handle_key_event(key, scancode, action, mods);
 }
 
 /**********************************************************************************************//**
@@ -37,9 +45,15 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
  * \param window
  * \param codepoint
  *************************************************************************************************/
-static void character_callback(GLFWwindow*, unsigned int codepoint)
+static void character_callback(GLFWwindow* window, unsigned int codepoint)
 {
+    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
+    if(input_controller == nullptr)
+    {
+        std::terminate();
+    }
 
+    input_controller->handle_character_event(codepoint);
 }
 
 /**********************************************************************************************//**
@@ -48,9 +62,15 @@ static void character_callback(GLFWwindow*, unsigned int codepoint)
  * \param xpos
  * \param ypos
  *************************************************************************************************/
-static void cursor_position_callback(GLFWwindow*, doubnle xpos, double ypos)
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
+    if(input_controller == nullptr)
+    {
+        std::terminate();
+    }
 
+    input_controller->handle_cursor_position_event(xpos, ypos);
 }
 
 /**********************************************************************************************//**
@@ -60,9 +80,15 @@ static void cursor_position_callback(GLFWwindow*, doubnle xpos, double ypos)
  * \param action
  * \param mods
  *************************************************************************************************/
-static void mouse_button_callback(GLFWwindow*, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
+    if(input_controller == nullptr)
+    {
+        std::terminate();
+    }
 
+    input_controller->handle_mouse_button_event(button, action, mods);
 }
 
 /**********************************************************************************************//**
@@ -173,6 +199,15 @@ Window& Window::operator=(Window&& other) noexcept
 void Window::poll_input()
 {
     glfwPollEvents();
+}
+
+/**********************************************************************************************//**
+ * \brief
+ * \param input_controller
+ *************************************************************************************************/
+void Window::register_input_controller(Input_Controller& input_controller)
+{
+    glfwSetWindowUserPointer(m_window_pointer, reinterpret_cast<void*>(&input_controller));
 }
 
 /**********************************************************************************************//**

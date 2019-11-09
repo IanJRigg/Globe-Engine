@@ -6,7 +6,6 @@
  * \brief Defult constructor
  *************************************************************************************************/
 Input_Controller::Input_Controller() :
-    m_quit_button_is_pressed(false),
     m_left_mouse_button_is_pressed(false),
     m_right_mouse_button_is_pressed(false),
     m_old_mouse_x_position(0L),
@@ -18,96 +17,35 @@ Input_Controller::Input_Controller() :
 }
 
 /**********************************************************************************************//**
- * \brief Move constructor
+ * \brief Move assignment constructor
  *************************************************************************************************/
-Input_Controller::Input_Controller(Input_Controller&& other) noexcept
+void Input_Controller::handle_key_event(int key, int scancode, int action, int mods)
 {
-    *this = std::move(other);
+
 }
 
 /**********************************************************************************************//**
  * \brief Move assignment constructor
  *************************************************************************************************/
-Input_Controller& Input_Controller::operator=(Input_Controller&& other) noexcept
+void Input_Controller::handle_character_event(unsigned int codepoint)
 {
-    if(this != &other)
-    {
-        std::swap(m_quit_button_is_pressed, other.m_quit_button_is_pressed);
-        std::swap(m_left_mouse_button_is_pressed, other.m_left_mouse_button_is_pressed);
-        std::swap(m_right_mouse_button_is_pressed, other.m_right_mouse_button_is_pressed);
-        std::swap(m_old_mouse_x_position, other.m_old_mouse_x_position);
-        std::swap(m_old_mouse_y_position, other.m_old_mouse_y_position);
-        std::swap(m_mouse_x_position, other.m_mouse_x_position);
-        std::swap(m_mouse_y_position, other.m_mouse_y_position);
-    }
 
-    return *this;
-}
-#include <iostream>
-/**********************************************************************************************//**
- * \brief
- *************************************************************************************************/
-void Input_Controller::process_input()
-{
-    // SDL_Event event = { 0 };
-    // bool mouse_has_not_moved = true;
-
-    // while(SDL_PollEvent(&event))
-    // {
-    //     // Esc button is pressed
-    //     if(event.type == SDL_QUIT)
-    //     {
-    //         m_quit_button_is_pressed = true;
-    //     }
-    //     else if(event.type == SDL_MOUSEBUTTONDOWN)
-    //     {
-    //         switch(event.button.button)
-    //         {
-    //             case SDL_BUTTON_LEFT:  m_left_mouse_button_is_pressed  = true; std::cout << "FUCK" << std::endl; break;
-    //             case SDL_BUTTON_RIGHT: m_right_mouse_button_is_pressed = true;  break;
-    //             default: break;
-    //         }
-    //     }
-    //     else if(event.type == SDL_MOUSEBUTTONUP)
-    //     {
-    //         switch(event.button.button)
-    //         {
-    //             case SDL_BUTTON_LEFT:  m_left_mouse_button_is_pressed  = false; std::cout << "SHITBALLS" << std::endl; break;
-    //             case SDL_BUTTON_RIGHT: m_right_mouse_button_is_pressed = false;  break;
-    //             default: break;
-    //         }
-    //     }
-    //     else if(event.type == SDL_MOUSEMOTION)
-    //     {
-    //         m_old_mouse_x_position = m_mouse_x_position;
-    //         m_old_mouse_y_position = m_mouse_y_position;
-
-    //         m_mouse_x_position = event.motion.x;
-    //         m_mouse_y_position = event.motion.y;
-
-    //         mouse_has_not_moved = false;
-    //     }
-    //     else
-    //     {
-    //         std::cout << event.type << std::endl;
-    //     }
-    // }
-
-    // // Since SDL won't report the mouse staying in the same place, we need to record this info
-    // if(mouse_has_not_moved)
-    // {
-    //     m_old_mouse_x_position = m_mouse_x_position;
-    //     m_old_mouse_y_position = m_mouse_y_position;
-    // }
 }
 
 /**********************************************************************************************//**
- * \brief  Checks if the quit button is pressed
- * \return true if quit button is pressed, otherwise false
+ * \brief Move assignment constructor
  *************************************************************************************************/
-bool Input_Controller::quit_was_pressed() const
+void Input_Controller::handle_cursor_position_event(double xpos, double ypos)
 {
-    return m_quit_button_is_pressed;
+
+}
+
+/**********************************************************************************************//**
+ * \brief Move assignment constructor
+ *************************************************************************************************/
+void Input_Controller::handle_mouse_button_event(int button, int action, int mods)
+{
+
 }
 
 /**********************************************************************************************//**

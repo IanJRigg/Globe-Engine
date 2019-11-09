@@ -248,8 +248,16 @@ const std::vector<float> cube_vertices {
       -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f
 };
 
-void chapter_7(Window& window)
+void chapter_7()
 {
+    Window window("LearnOpenGL Chapter 7", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+
+    Input_Controller input_controller;
+    window.register_input_controller(input_controller);
+
     std::vector<float> vertices {
     //    Positions               Colors                 Texture coords
            0.5f,  0.5f,  0.0f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f, // Top Right
@@ -296,18 +304,14 @@ void chapter_7(Window& window)
     program.set_uniform_integer("texture1", 0);
     program.set_uniform_integer("texture2", 1);
 
-    Input_Controller input_controller;
-
     while(no_signals_have_been_raised())
     {
-        // Check for input
-        input_controller.process_input();
-
-        if(input_controller.quit_was_pressed())
+        if(window.should_close())
         {
             break;
         }
-        else if(input_controller.up_key_is_pressed())
+
+        if(input_controller.up_key_is_pressed())
         {
             if(mix < 10L)
             {
@@ -342,8 +346,16 @@ void chapter_7(Window& window)
     }
 }
 
-void chapter_8(Window& window)
+void chapter_8()
 {
+    Window window("LearnOpenGL Chapter 8", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+
+    Input_Controller input_controller;
+    window.register_input_controller(input_controller);
+
     std::vector<float> vertices {
     //    Positions               Colors                 Texture coords
            0.5f,  0.5f,  0.0f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f, // Top Right
@@ -390,18 +402,14 @@ void chapter_8(Window& window)
     program.set_uniform_integer("texture1", 0);
     program.set_uniform_integer("texture2", 1);
 
-    Input_Controller input_controller;
-
     while(no_signals_have_been_raised())
     {
-        // Check for input
-        input_controller.process_input();
-
-        if(input_controller.quit_was_pressed())
+        if(window.should_close())
         {
             break;
         }
-        else if(input_controller.up_key_is_pressed())
+
+        if(input_controller.up_key_is_pressed())
         {
             if(mix < 10L)
             {
@@ -435,8 +443,16 @@ void chapter_8(Window& window)
     }
 }
 
-void chapter_9(Window& window)
+void chapter_9()
 {
+    Window window("LearnOpenGL Chapter 9", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+
+    Input_Controller input_controller;
+    window.register_input_controller(input_controller);
+
     // Buffer_Controller buffer_controller;
     // buffer_controller.bind();
     // buffer_controller.load_array_buffer(cube_vertices);
@@ -569,8 +585,16 @@ void chapter_9(Window& window)
     }
 }
 
-void chapter_10(Window& window)
+void chapter_10()
 {
+    Window window("LearnOpenGL Chapter 10", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+
+    Input_Controller input_controller;
+    window.register_input_controller(input_controller);
+
     // View Space Transformation Matrices
     glm::mat4 transformation(1.0f);
 
@@ -616,8 +640,6 @@ void chapter_10(Window& window)
 
     program.set_uniform_integer("texture1", 0);
 
-    Input_Controller input_controller;
-
     // Matrices
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
     glm::mat4 mvp(1.0f);
@@ -625,13 +647,6 @@ void chapter_10(Window& window)
     while(no_signals_have_been_raised())
     {
         // Check for input
-        input_controller.process_input();
-
-        if(input_controller.quit_was_pressed())
-        {
-            break;
-        }
-
         if(input_controller.up_key_is_pressed())
         {
 
@@ -691,13 +706,7 @@ int main()
 {
     setup_signal_handlers();
 
-    Window window("LearnOpenGL", 768UL, 1024UL);
-    window.enable_vsync();
-    window.enable_depth_test();
-    window.enable_backface_culling();
-
-    chapter_9(window);
-    //fuck();
+    chapter_9();
 
     return EXIT_SUCCESS;
 }
