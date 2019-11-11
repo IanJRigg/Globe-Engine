@@ -206,11 +206,11 @@ int32_t mix = 0;
 const std::vector<float> cube_vertices {
 //    Positions               Colors                 Texture coords
       -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
+       0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
        0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
        0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
-       0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
-      -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
       -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
 
       -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
        0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
@@ -227,11 +227,11 @@ const std::vector<float> cube_vertices {
       -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
 
        0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
+       0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
        0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
        0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
-       0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
-       0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
        0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
 
       -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
        0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
@@ -241,11 +241,11 @@ const std::vector<float> cube_vertices {
       -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
 
       -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
        0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
        0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
-       0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 0.0f,
-      -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
-      -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f
+      -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f
 };
 
 void chapter_7()
@@ -498,9 +498,15 @@ void chapter_9()
 
     glm::mat4 mvp(1.0f);
 
-    float rotation_angle = 0.0f;
+    bool mouse_is_being_held_down = false;
 
-    bool left_click_is_being_held_down = false;
+    double start_x_position = 0.0f;
+    double current_x_position = 0.0f;
+
+    double start_y_position = 0.0f;
+    double current_y_position = 0.0f;
+
+    glm::vec3 cube_angles(0.0f, 0.0f, 0.0f);
 
     while(no_signals_have_been_raised())
     {
@@ -513,39 +519,57 @@ void chapter_9()
 
         if(input_controller.left_mouse_button_is_pressed())
         {
-            std::cout << "Holding" << std::endl;
-            //rotation_axis.x = input_controller.mouse_x_input();
-            //rotation_axis.y = input_controller.mouse_y_input();
-            if(/*input_controller.mouse_x_input() ||*/ input_controller.mouse_y_input())
+            if(mouse_is_being_held_down)
             {
-                rotation_angle += input_controller.mouse_y_input();
-                if(rotation_angle >= 360.0f || rotation_angle <= -360.0f)
+                // Take care of x rotations
+                start_x_position = current_x_position;
+                current_x_position = input_controller.mouse_x_position();
+
+                if(current_x_position - start_x_position >= 2.0f)
                 {
-                    rotation_angle = 0.0f;
+                    cube_angles.x +=  1.0f;
+                    rotation = glm::rotate(rotation, glm::radians(1.0f), y_axis);
+                }
+                else if(current_y_position - start_y_position <= -2.0f)
+                {
+                    cube_angles.x += -1.0f;
+                    rotation = glm::rotate(rotation, glm::radians(-1.0f), y_axis);
                 }
 
-                rotation = glm::rotate(rotation, glm::radians(rotation_angle), x_axis);
+                if(cube_angles.x >= 360.0f || cube_angles.x <= -360.0f)
+                {
+                    cube_angles.x = 0.0f;
+                }
+
+                // Take care of y rotations
+                start_y_position = current_y_position;
+                current_y_position = input_controller.mouse_y_position();
+
+                if(current_y_position - start_y_position >= 2.0f)
+                {
+                    cube_angles.y +=  1.0f;
+                    rotation = glm::rotate(rotation, glm::radians(1.0f), x_axis);
+                }
+                else if(current_y_position - start_y_position <= -2.0f)
+                {
+                    cube_angles.y += -1.0f;
+                    rotation = glm::rotate(rotation, glm::radians(-1.0f), x_axis);
+                }
+
+                if(cube_angles.y >= 360.0f || cube_angles.y <= -360.0f)
+                {
+                    cube_angles.y = 0.0f;
+                }
+            }
+            else
+            {
+                start_x_position = input_controller.mouse_y_position();
+                mouse_is_being_held_down = true;
             }
         }
-
-        if(input_controller.up_key_is_pressed())
+        else
         {
-            rotation = glm::rotate(rotation, glm::radians(5.0f), x_axis);
-        }
-
-        if(input_controller.down_key_is_pressed())
-        {
-            rotation = glm::rotate(rotation, glm::radians(-5.0f), x_axis);
-        }
-
-        if(input_controller.right_key_is_pressed())
-        {
-            rotation = glm::rotate(rotation, glm::radians(-5.0f), y_axis);
-        }
-
-        if(input_controller.left_key_is_pressed())
-        {
-            rotation = glm::rotate(rotation, glm::radians(5.0f), y_axis);
+            mouse_is_being_held_down = false;
         }
 
         // Start rendering

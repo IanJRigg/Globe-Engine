@@ -35,10 +35,6 @@ public:
     bool left_key_is_pressed() const;
     bool right_key_is_pressed() const;
 
-    // Mouse Motion
-    double mouse_x_input() const;
-    double mouse_y_input() const;
-
     // Whitespace keys
     bool tab_key_is_pressed() const;
     bool return_key_is_pressed() const;

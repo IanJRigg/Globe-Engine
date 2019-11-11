@@ -11,10 +11,10 @@
 Input_Controller::Input_Controller() :
     m_left_mouse_button_is_pressed(false),
     m_right_mouse_button_is_pressed(false),
-    m_old_mouse_x_position(0L),
-    m_old_mouse_y_position(0L),
-    m_mouse_x_position(0L),
-    m_mouse_y_position(0L)
+    m_old_mouse_x_position(0.0),
+    m_old_mouse_y_position(0.0),
+    m_mouse_x_position(0.0),
+    m_mouse_y_position(0.0)
 {
 
 }
@@ -59,6 +59,10 @@ void Input_Controller::handle_mouse_button_event(int button, int action, int)
     else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
     {
         m_right_mouse_button_is_pressed = true;
+    }
+    else
+    {
+        std::cerr << "Bad input to the mouse button callback" << std::endl;
     }
 }
 
@@ -132,48 +136,6 @@ bool Input_Controller::left_key_is_pressed() const
 bool Input_Controller::right_key_is_pressed() const
 {
     return false;
-}
-
-/**********************************************************************************************//**
- * \brief  Checks if the mouse has move in the x direction
- * \return -1 if mouse has moved left, 1 if mouse has moved right, and 0 if it hasn't changed
- *************************************************************************************************/
-double Input_Controller::mouse_x_input() const
-{
-    double difference = m_mouse_x_position - m_old_mouse_x_position;
-    if(difference >= 1.0f)
-    {
-        return 0.1f;
-    }
-    else if(difference <= -1.0f)
-    {
-        return -0.1f;
-    }
-    else
-    {
-        return 0.0f;
-    }
-}
-
-/**********************************************************************************************//**
- * \brief  Checks if the mouse has move in the y direction
- * \return -1 if mouse has moved down, 1 if mouse has moved up, and 0 if it hasn't changed
- *************************************************************************************************/
-double Input_Controller::mouse_y_input() const
-{
-    double difference = m_mouse_y_position - m_old_mouse_y_position;
-    if(difference >= 1.0f)
-    {
-        return 0.1f;
-    }
-    else if(difference <= -1.0f)
-    {
-        return -0.1f;
-    }
-    else
-    {
-        return 0.0f;
-    }
 }
 
 /**********************************************************************************************//**
