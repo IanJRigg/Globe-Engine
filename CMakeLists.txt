@@ -7,6 +7,7 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 
 set(SRC_DIR src/)
+set(LIB_DIR lib/)
 set(TEST_DIR test/)
 set(INCLUDE_DIR include/)
 

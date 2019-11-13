@@ -17,6 +17,12 @@ set(SOURCE_FILES
     program.cpp
     texture.cpp
     window.cpp
+    ../${LIB_DIR}/imgui/imgui.cpp
+    ../${LIB_DIR}/imgui/imgui_demo.cpp
+    ../${LIB_DIR}/imgui/imgui_draw.cpp
+    ../${LIB_DIR}/imgui/imgui_impl_glfw.cpp
+    ../${LIB_DIR}/imgui/imgui_impl_opengl3.cpp
+    ../${LIB_DIR}/imgui/imgui_widgets.cpp
 )
 
 set(HEADER_FILES
@@ -27,6 +33,14 @@ set(HEADER_FILES
     program.h
     texture.h
     window.h
+    ../${INCLUDE_DIR}/imgui/imconfig.h
+    ../${INCLUDE_DIR}/imgui/imgui.h
+    ../${INCLUDE_DIR}/imgui/imgui_impl_glfw.h
+    ../${INCLUDE_DIR}/imgui/imgui_impl_opengl3.h
+    ../${INCLUDE_DIR}/imgui/imgui_internal.h
+    ../${INCLUDE_DIR}/imgui/imstb_rectpack.h
+    ../${INCLUDE_DIR}/imgui/imstb_textedit.h
+    ../${INCLUDE_DIR}/imgui/imstb_truetype.h
 )
 
 find_package(glm REQUIRED)
@@ -63,6 +77,7 @@ target_include_directories(
     PRIVATE
         ${OPEN_GL_INCLUDE_DIR}
         ../${INCLUDE_DIR}/
+        ../${INCLUDE_DIR}/imgui
 )
 
 target_link_libraries(

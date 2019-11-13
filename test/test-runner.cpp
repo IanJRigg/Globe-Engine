@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include "catch2/catch.hpp"
+#include "catch/catch.hpp"
 
 TEST_CASE("Basic Checkout")
 {

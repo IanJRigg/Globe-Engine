@@ -12,7 +12,7 @@ set(TEST_SOURCE_FILES
 )
 
 set(TEST_HEADER_FILES
-    ../include/catch2/catch.hpp
+    ../include/catch/catch.hpp
 )
 
 add_executable(

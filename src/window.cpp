@@ -8,6 +8,9 @@
 
 #include "input-controller.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+
 /**********************************************************************************************//**
  * \brief
  * \param window
@@ -191,6 +194,14 @@ void Window::poll_input()
 void Window::register_input_controller(Input_Controller& input_controller)
 {
     glfwSetWindowUserPointer(m_window_pointer, reinterpret_cast<void*>(&input_controller));
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+void Window::register_imgui() const
+{
+    ImGui_ImplGlfw_InitForOpenGL(m_window_pointer, true);
 }
 
 /**********************************************************************************************//**

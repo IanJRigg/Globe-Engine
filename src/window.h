@@ -23,6 +23,7 @@ public:
 
     void poll_input();
     void register_input_controller(Input_Controller& input_controller);
+    void register_imgui() const;
 
     void swap_buffers() const;
     void clear_color(const float red,
