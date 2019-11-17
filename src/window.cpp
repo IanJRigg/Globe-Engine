@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-#include "input-controller.h"
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 
@@ -32,15 +30,15 @@ static void framebuffer_size_callback(GLFWwindow*, int width, int height)
  * \param action
  * \param mods
  *************************************************************************************************/
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void key_callback(GLFWwindow* glfw_window, int key, int scancode, int action, int mods)
 {
-    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
-    if(input_controller == nullptr)
+    Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window == nullptr)
     {
         std::terminate();
     }
 
-    input_controller->handle_key_event(key, scancode, action, mods);
+    window->handle_key_event(key, scancode, action, mods);
 }
 
 /**********************************************************************************************//**
@@ -49,15 +47,15 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
  * \param xpos
  * \param ypos
  *************************************************************************************************/
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+static void cursor_position_callback(GLFWwindow* glfw_window, double xpos, double ypos)
 {
-    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
-    if(input_controller == nullptr)
+    Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window == nullptr)
     {
         std::terminate();
     }
 
-    input_controller->handle_cursor_position_event(xpos, ypos);
+    window->handle_cursor_position_event(xpos, ypos);
 }
 
 /**********************************************************************************************//**
@@ -67,15 +65,15 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
  * \param action
  * \param mods
  *************************************************************************************************/
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow* glfw_window, int button, int action, int mods)
 {
-    Input_Controller* input_controller = reinterpret_cast<Input_Controller*>(glfwGetWindowUserPointer(window));
-    if(input_controller == nullptr)
+    Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window == nullptr)
     {
         std::terminate();
     }
 
-    input_controller->handle_mouse_button_event(button, action, mods);
+    window->handle_mouse_button_event(button, action, mods);
 }
 
 /**********************************************************************************************//**
@@ -95,7 +93,13 @@ static void error_callback(int, const char* description)
  * \param height
  *************************************************************************************************/
 Window::Window(const std::string& title, const uint32_t height, const uint32_t width) :
-    m_window_pointer(nullptr)
+    m_window_pointer(nullptr),
+    m_left_mouse_button_is_pressed(false),
+    m_right_mouse_button_is_pressed(false),
+    m_old_mouse_x_position(0.0f),
+    m_old_mouse_y_position(0.0f),
+    m_mouse_x_position(0.0f),
+    m_mouse_y_position(0.0f)
 {
     if(glfwInit() == GLFW_FALSE)
     {
@@ -133,6 +137,8 @@ Window::Window(const std::string& title, const uint32_t height, const uint32_t w
         std::cerr << "Unable to load OpenGL Extensions" << std::endl;
         std::terminate();
     }
+
+    glfwSetWindowUserPointer(m_window_pointer, reinterpret_cast<void*>(this));
 
     // Window callbacks
     glfwSetFramebufferSizeCallback(m_window_pointer, framebuffer_size_callback);
@@ -174,6 +180,12 @@ Window& Window::operator=(Window&& other) noexcept
     if(this != &other)
     {
         std::swap(m_window_pointer, other.m_window_pointer);
+        std::swap(m_left_mouse_button_is_pressed, other.m_left_mouse_button_is_pressed);
+        std::swap(m_right_mouse_button_is_pressed, other.m_right_mouse_button_is_pressed);
+        std::swap(m_old_mouse_x_position, other.m_old_mouse_x_position);
+        std::swap(m_old_mouse_y_position, other.m_old_mouse_y_position);
+        std::swap(m_mouse_x_position, other.m_mouse_x_position);
+        std::swap(m_mouse_y_position, other.m_mouse_y_position);
     }
 
     return *this;
@@ -188,12 +200,86 @@ void Window::poll_input()
 }
 
 /**********************************************************************************************//**
- * \brief
- * \param input_controller
+ * \brief Move assignment constructor
  *************************************************************************************************/
-void Window::register_input_controller(Input_Controller& input_controller)
+void Window::handle_key_event(int key, int scancode, int action, int)
 {
-    glfwSetWindowUserPointer(m_window_pointer, reinterpret_cast<void*>(&input_controller));
+
+}
+
+/**********************************************************************************************//**
+ * \brief Move assignment constructor
+ *************************************************************************************************/
+void Window::handle_cursor_position_event(double xpos, double ypos)
+{
+    m_old_mouse_x_position = m_mouse_x_position;
+    m_old_mouse_y_position = m_mouse_y_position;
+
+    m_mouse_x_position = xpos;
+    m_mouse_y_position = ypos;
+}
+
+/**********************************************************************************************//**
+ * \brief Move assignment constructor
+ *************************************************************************************************/
+void Window::handle_mouse_button_event(int button, int action, int)
+{
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        m_left_mouse_button_is_pressed = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        m_left_mouse_button_is_pressed = false;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+        m_right_mouse_button_is_pressed = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+    {
+        m_right_mouse_button_is_pressed = true;
+    }
+    else
+    {
+        std::cerr << "Bad input to the mouse button callback" << std::endl;
+    }
+}
+
+/**********************************************************************************************//**
+ * \brief  Accessor for the mouse's x position
+ * \return The value in m_mouse_position_x
+ *************************************************************************************************/
+double Window::mouse_x_position() const
+{
+    return m_mouse_x_position;
+}
+
+/**********************************************************************************************//**
+ * \brief  Accessor for the mouse's y position
+ * \return The value in m_mouse_position_y
+ *************************************************************************************************/
+double Window::mouse_y_position() const
+{
+    return m_mouse_y_position;
+}
+
+/**********************************************************************************************//**
+ * \brief  Checks if the left mouse button is pressed
+ * \return true if the left mouse button is pressed, otherwise false
+ *************************************************************************************************/
+bool Window::left_mouse_button_is_pressed() const
+{
+    return m_left_mouse_button_is_pressed;
+}
+
+/**********************************************************************************************//**
+ * \brief  Checks if the right mouse button is pressed
+ * \return true if the right mouse button is pressed, otherwise false
+ *************************************************************************************************/
+bool Window::right_mouse_button_is_pressed() const
+{
+    return m_right_mouse_button_is_pressed;
 }
 
 /**********************************************************************************************//**
@@ -202,25 +288,6 @@ void Window::register_input_controller(Input_Controller& input_controller)
 void Window::register_imgui() const
 {
     ImGui_ImplGlfw_InitForOpenGL(m_window_pointer, true);
-}
-
-/**********************************************************************************************//**
- * \brief
- *************************************************************************************************/
-void Window::clear_color(const float red,
-                         const float green,
-                         const float blue,
-                         const float alpha) const
-{
-    glClearColor(red, green, blue, alpha);
-}
-
-/**********************************************************************************************//**
- * \brief
- *************************************************************************************************/
-void Window::clear_buffer_bits() const
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /**********************************************************************************************//**
@@ -242,6 +309,14 @@ bool Window::should_close() const
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
+bool Window::should_not_close() const
+{
+    return !(this->should_close());
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
 void Window::enable_vsync() const
 {
     glfwSwapInterval(1);
@@ -253,6 +328,25 @@ void Window::enable_vsync() const
 void Window::disable_vsync() const
 {
     glfwSwapInterval(0);
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+void Window::clear_color(const float red,
+                         const float green,
+                         const float blue,
+                         const float alpha) const
+{
+    glClearColor(red, green, blue, alpha);
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+void Window::clear_buffer_bits() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /**********************************************************************************************//**

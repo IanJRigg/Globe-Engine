@@ -13,7 +13,6 @@ set(SOURCE_FILES
     glad.c
     main.cpp
     buffer-controller.cpp
-    input-controller.cpp
     program.cpp
     texture.cpp
     window.cpp
@@ -29,7 +28,6 @@ set(HEADER_FILES
     fragment-shader.h
     vertex-shader.h
     buffer-controller.h
-    input-controller.h
     program.h
     texture.h
     window.h
