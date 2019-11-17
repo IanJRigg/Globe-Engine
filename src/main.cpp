@@ -424,10 +424,10 @@ int main(int argc, char** argv)
         buffer_controller.bind();
         buffer_controller.draw();
 
-        // rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Swap the windows
         window.swap_buffers();
     }
 
