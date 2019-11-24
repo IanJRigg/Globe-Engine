@@ -195,6 +195,7 @@ static void setup_signal_handlers()
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "camera.h"
 #include "program.h"
 #include "texture.h"
 #include "mesh.h"
@@ -556,65 +557,6 @@ void render_sphere_via_subdivided_tetrahedron()
     ImGui::DestroyContext();
 }
 
-// /* convert from cubemap coords to cartesian coords on surface of sphere */
-// static union vec3 fxy_to_xyz(int f, int i, int j, const int dim)
-// {
-//     union vec3 answer;
-
-//     switch (f) {
-//     case 0:
-//         answer.v.x = (float) (i - dim / 2) / (float) dim;
-//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
-//         answer.v.z = 0.5;
-//         break;
-//     case 1:
-//         answer.v.x = 0.5;
-//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
-//         answer.v.z = -(float) (i - dim / 2) / (float) dim;
-//         break;
-//     case 2:
-//         answer.v.x = -(float) (i - dim / 2) / (float) dim;
-//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
-//         answer.v.z = -0.5;
-//         break;
-//     case 3:
-//         answer.v.x = -0.5;
-//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
-//         answer.v.z = (float) (i - dim / 2) / (float) dim;
-//         break;
-//     case 4:
-//         answer.v.x = (float) (i - dim / 2) / (float) dim;
-//         answer.v.y = 0.5;
-//         answer.v.z = (float) (j - dim / 2) / (float) dim;
-//         break;
-//     case 5:
-//         answer.v.x = (float) (i - dim / 2) / (float) dim;
-//         answer.v.y = -0.5;
-//         answer.v.z = -(float) (j - dim / 2) / (float) dim;
-//         break;
-//     }
-//     vec3_normalize_self(&answer);
-//     return answer;
-// }
-
-// static void initialize_vertices(void)
-// {
-//     int f, i, j;
-
-//     for (int face = 0; f < 6; face++)
-//     {
-//         for (x = 0; i < n; x++)
-//         {
-//             for (y = 0; j < n; y++)
-//             {
-//                 const union vec3 v = fxy_to_xyz(face, x, y, n);
-//                 vertex[face][x][y] = v;
-//             }
-//         }
-//     }
-// }
-
-
 void generate_cube_with_subdivisions(std::vector<float>& vertices,
                                      std::vector<uint32_t>& indices,
                                      const uint32_t number_of_subdivisions)
@@ -625,8 +567,6 @@ void generate_cube_with_subdivisions(std::vector<float>& vertices,
 
     float step = 1.0 / (vertices_per_side - 1UL);
     uint32_t n = 0UL;
-
-    std::cout << vertices_per_side << std::endl;
 
     for(uint32_t i = 0; i < vertices_per_side; i++)
     {
@@ -739,19 +679,9 @@ void render_sphere_via_cube_map()
     window.register_imgui();
     ImGui_ImplOpenGL3_Init("#version 410 core");
 
-    // Subdivision to Vertices
-    // 0 24
-    // 1 66
-    // 2 120
-
-    // Subdivisions to Indices
-    // 0 24
-    // 1
-    // 2
-
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
-    generate_cube_with_subdivisions(vertices, indices, 2);
+    generate_cube_with_subdivisions(vertices, indices, 100);
 
     Mesh mesh;
     mesh.bind();
@@ -767,18 +697,16 @@ void render_sphere_via_cube_map()
 
     program.use();
 
+    Camera camera;
+    camera.position.z = 2.0f;
+
     glm::mat4 transformation(1.0f);
     glm::mat4 rotation(1.0f);
     glm::mat4 scale(1.0f);
+
     glm::mat4 model(1.0f);
-
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
+    glm::mat4 view = camera.look_at();
+    glm::mat4 projection = glm::perspective(glm::radians(camera.zoom()), window.aspect_ratio(), 0.1f, 100.0f);
 
     glm::mat4 mvp(1.0f);
 
@@ -801,14 +729,21 @@ void render_sphere_via_cube_map()
 
             ImGui::Begin("Hello World!");
 
+            ImGui::SliderFloat("Z Position", &camera.position.z, -10.0f, 10.0f);
+
             ImGui::End();
         }
+
+        std::cout << camera.position.z << std::endl;
 
         // Render Logic
         window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
         window.clear_buffer_bits();
 
         program.use();
+
+        view = camera.look_at();
+        projection = glm::perspective(glm::radians(camera.zoom()), window.aspect_ratio(), 0.1f, 100.0f);
 
         model = transformation * rotation * scale;
         mvp = projection * view * model;

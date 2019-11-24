@@ -11,6 +11,7 @@ project(${PROJECT_NAME} VERSION 1.0 LANGUAGES CXX)
 
 set(SOURCE_FILES
     glad.c
+    camera.cpp
     main.cpp
     mesh.cpp
     program.cpp
@@ -25,8 +26,8 @@ set(SOURCE_FILES
 )
 
 set(HEADER_FILES
+    camera.h
     fragment-shader.h
-    game-object.h
     vertex-shader.h
     mesh.h
     program.h

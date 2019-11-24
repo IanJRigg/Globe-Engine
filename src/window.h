@@ -20,6 +20,9 @@ public:
     Window& operator=(const Window& other) = delete;
     Window& operator=(Window&& other) noexcept;
 
+    // Accessors
+    float aspect_ratio() const;
+
     // Input Functions
     void poll_input();
 

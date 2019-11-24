@@ -194,6 +194,19 @@ Window& Window::operator=(Window&& other) noexcept
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
+float Window::aspect_ratio() const
+{
+    int width  = 0UL;
+    int height = 0UL;
+
+    glfwGetWindowSize(m_window_pointer, &width, &height);
+
+    return static_cast<float>(width) / height;
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
 void Window::poll_input()
 {
     glfwPollEvents();
