@@ -26,6 +26,7 @@ set(SOURCE_FILES
 
 set(HEADER_FILES
     fragment-shader.h
+    game-object.h
     vertex-shader.h
     mesh.h
     program.h
