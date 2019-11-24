@@ -12,7 +12,7 @@ project(${PROJECT_NAME} VERSION 1.0 LANGUAGES CXX)
 set(SOURCE_FILES
     glad.c
     main.cpp
-    buffer-controller.cpp
+    mesh.cpp
     program.cpp
     texture.cpp
     window.cpp
@@ -27,7 +27,7 @@ set(SOURCE_FILES
 set(HEADER_FILES
     fragment-shader.h
     vertex-shader.h
-    buffer-controller.h
+    mesh.h
     program.h
     texture.h
     window.h

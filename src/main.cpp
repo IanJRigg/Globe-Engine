@@ -197,14 +197,14 @@ static void setup_signal_handlers()
 
 #include "program.h"
 #include "texture.h"
-#include "buffer-controller.h"
+#include "mesh.h"
 #include "window.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-int32_t mix = 0;
+#include <cmath>
 
 const std::vector<float> cube_vertices {
 //    Positions               Colors                 Texture coords
@@ -251,11 +251,9 @@ const std::vector<float> cube_vertices {
       -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f
 };
 
-int main(int argc, char** argv)
+void render_cube()
 {
-    setup_signal_handlers();
-
-    Window window("LearnOpenGL Chapter 9", 768UL, 1024UL);
+    Window window("Render Cube", 768UL, 1024UL);
     window.enable_vsync();
     window.enable_depth_test();
     window.enable_backface_culling();
@@ -272,12 +270,12 @@ int main(int argc, char** argv)
     window.register_imgui();
     ImGui_ImplOpenGL3_Init("#version 410 core");
 
-    Buffer_Controller buffer_controller;
-    buffer_controller.bind();
-    buffer_controller.load_array_buffer(cube_vertices);
-    buffer_controller.set_array_attribute(0, 3, 0);
-    buffer_controller.set_array_attribute(1, 3, 3);
-    buffer_controller.set_array_attribute(2, 2, 6);
+    Mesh mesh;
+    mesh.bind();
+    mesh.load_vertex_buffer(cube_vertices);
+    mesh.set_vertex_buffer_attribute(0, 3, 0);
+    mesh.set_vertex_buffer_attribute(1, 3, 3);
+    mesh.set_vertex_buffer_attribute(2, 2, 6);
 
     Texture_2D texture;
     texture.bind();
@@ -288,8 +286,8 @@ int main(int argc, char** argv)
     texture.set_magnifying_filter_to_nearest();
 
     Program program;
-    program.load_vertex_shader("shaders/vertex/ex-9.vert");
-    program.load_fragment_shader("shaders/fragment/ex-9.frag");
+    program.load_vertex_shader("shaders/vertex/cube.vert");
+    program.load_fragment_shader("shaders/fragment/cube.frag");
     program.link();
 
     program.use();
@@ -390,7 +388,7 @@ int main(int argc, char** argv)
             }
         }
 
-        // GUI Logic
+        // UI Logic
         {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -421,8 +419,8 @@ int main(int argc, char** argv)
 
         program.set_uniform_mat4("mvp", mvp);
 
-        buffer_controller.bind();
-        buffer_controller.draw();
+        mesh.bind();
+        mesh.draw();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -435,6 +433,567 @@ int main(int argc, char** argv)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+}
+
+void generate_subdivided_tetrahedron(std::vector<float>& vertices, std::vector<uint32_t>& indices, const uint32_t level)
+{
+    const float root_two_over_three = sqrt(2.0) / 3.0;
+    const float one_third = -(1.0 / 3.0);
+    const float root_six_over_three = sqrt(6.0) / 3.0;
+
+    vertices.reserve(pow(4.0, level + 1));
+}
+
+void subdivide(std::vector<float>& vertices, std::vector<uint32_t>& indices, const uint32_t level)
+{
+    if(level > 0)
+    {
+        subdivide(vertices, indices, level - 1);
+    }
+    else
+    {
+
+    }
+}
+
+void render_sphere_via_subdivided_tetrahedron()
+{
+    Window window("Subdivision Surfaces Sphere", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    // window.enable_backface_culling();
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    window.register_imgui();
+    ImGui_ImplOpenGL3_Init("#version 410 core");
+
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+    generate_subdivided_tetrahedron(vertices, indices, 1);
+
+    Mesh mesh;
+    mesh.bind();
+    mesh.load_vertex_buffer(vertices);
+    mesh.load_index_buffer(indices);
+    mesh.set_vertex_buffer_attribute(0, 3, 0); // Mark the X/Y/Z vertices
+
+    Program program;
+    program.load_vertex_shader("shaders/vertex/cube-map.vert");
+    program.load_fragment_shader("shaders/fragment/cube-map.frag");
+    program.link();
+
+    program.use();
+
+    glm::mat4 transformation(1.0f);
+    glm::mat4 rotation(1.0f);
+    glm::mat4 scale(1.0f);
+    glm::mat4 model(1.0f);
+
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
+
+    glm::mat4 mvp(1.0f);
+
+    while(no_signals_have_been_raised() && window.should_not_close())
+    {
+        // IO Logic
+        window.poll_input();
+
+        // Make sure tha the mouse events aren't happneing in the UI
+        if(io.WantCaptureMouse == false)
+        {
+
+        }
+
+        // UI Logic
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Hello World!");
+
+            ImGui::End();
+        }
+
+        // Render Logic
+        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
+        window.clear_buffer_bits();
+
+        program.use();
+
+        model = transformation * rotation * scale;
+        mvp = projection * view * model;
+
+        program.set_uniform_mat4("mvp", mvp);
+
+        mesh.bind();
+        mesh.draw();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Swap the windows
+        window.swap_buffers();
+    }
+
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+// /* convert from cubemap coords to cartesian coords on surface of sphere */
+// static union vec3 fxy_to_xyz(int f, int i, int j, const int dim)
+// {
+//     union vec3 answer;
+
+//     switch (f) {
+//     case 0:
+//         answer.v.x = (float) (i - dim / 2) / (float) dim;
+//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
+//         answer.v.z = 0.5;
+//         break;
+//     case 1:
+//         answer.v.x = 0.5;
+//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
+//         answer.v.z = -(float) (i - dim / 2) / (float) dim;
+//         break;
+//     case 2:
+//         answer.v.x = -(float) (i - dim / 2) / (float) dim;
+//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
+//         answer.v.z = -0.5;
+//         break;
+//     case 3:
+//         answer.v.x = -0.5;
+//         answer.v.y = -(float) (j - dim / 2) / (float) dim;
+//         answer.v.z = (float) (i - dim / 2) / (float) dim;
+//         break;
+//     case 4:
+//         answer.v.x = (float) (i - dim / 2) / (float) dim;
+//         answer.v.y = 0.5;
+//         answer.v.z = (float) (j - dim / 2) / (float) dim;
+//         break;
+//     case 5:
+//         answer.v.x = (float) (i - dim / 2) / (float) dim;
+//         answer.v.y = -0.5;
+//         answer.v.z = -(float) (j - dim / 2) / (float) dim;
+//         break;
+//     }
+//     vec3_normalize_self(&answer);
+//     return answer;
+// }
+
+// static void initialize_vertices(void)
+// {
+//     int f, i, j;
+
+//     for (int face = 0; f < 6; face++)
+//     {
+//         for (x = 0; i < n; x++)
+//         {
+//             for (y = 0; j < n; y++)
+//             {
+//                 const union vec3 v = fxy_to_xyz(face, x, y, n);
+//                 vertex[face][x][y] = v;
+//             }
+//         }
+//     }
+// }
+
+
+void generate_cube_with_subdivisions(std::vector<float>& vertices,
+                                     std::vector<uint32_t>& indices,
+                                     const uint32_t number_of_subdivisions)
+{
+    const uint32_t vertices_per_side = number_of_subdivisions + 2;
+
+    vertices.resize(vertices_per_side * vertices_per_side * 3, 0.0f);
+
+    float step = 1.0 / (vertices_per_side - 1UL);
+    uint32_t n = 0UL;
+
+    std::cout << vertices_per_side << std::endl;
+
+    for(uint32_t i = 0; i < vertices_per_side; i++)
+    {
+        for(uint32_t j = 0; j < vertices_per_side; j++)
+        {
+            vertices.at(n + 0UL) = j * step; // X
+            vertices.at(n + 1UL) = i * step; // Y
+            vertices.at(n + 2UL) = 0.0f;     // Z
+
+            //std::cout << j * step << " " << i * step << " " << 0.0 << std::endl;
+
+            n += 3UL;
+        }
+    }
+
+    n = 0UL;
+
+
+    // Number of Subdivisions: 1
+
+    // Vertices
+    // 6 7 8
+    // 3 4 5
+    // 0 1 2
+
+    // Indices
+    // 0 1 4   i = 0; j = 0;
+    // 0 4 3   i = 0; j = 0l
+    // 1 2 5   i = 0; j = 1;
+    // 1 5 4   i = 0; j = 1;
+    // 3 4 7   i = 1; j = 0;
+    // 3 7 6   i = 1; j = 0;
+    // 4 5 8   i = 1; j = 1;
+    // 4 8 7   i = 1; j = 1;
+
+
+    // NUmber of Subdivisions: 2
+
+    // C D E F
+    // 8 9 A B
+    // 4 5 6 7
+    // 0 1 2 3
+
+    // Indices
+    // 0 1 5   i = 0; j = 0;
+    // 0 5 4   i = 0; j = 0;
+    // 1 2 6   i = 0; j = 1;
+    // 1 6 5   i = 0; j = 1;
+    // 2 3 7   i = 0; j = 2;
+    // 2 7 6   i = 0; j = 2;
+    // 4 5 9   i = 1; j = 0;
+    // 4 9 8   i = 1; j = 0;
+    // 5 6 A   i = 1; j = 1;
+    // 5 A 9   i = 1; j = 1;
+    // 6 7 B   i = 1; j = 2;
+    // 6 B A   i = 1; j = 2;
+    // 8 9 D   i = 2; j = 0;
+    // 8 D C   i = 2; j = 0;
+    // 9 A E   i = 2; j = 1;
+    // 9 E D   i = 2; j = 1;
+    // A B F   i = 2; j = 2;
+    // A F E   i = 2; j = 2;
+
+    std::cout << std::endl;
+
+    indices.resize((vertices_per_side - 1) * (vertices_per_side - 1) * 6, 0UL);
+
+    for(uint32_t i = 0; i < vertices_per_side - 1; ++i)
+    {
+        for(uint32_t j = 0; j < vertices_per_side - 1; ++j)
+        {
+            indices.at(n + 0UL) = i * vertices_per_side + j;       // X
+            indices.at(n + 1UL) = i * vertices_per_side + j + 1UL; // Y
+            indices.at(n + 2UL) = i * vertices_per_side + j + (vertices_per_side + 1UL); // Z
+
+            // std::cout << i * vertices_per_side + j << " "
+            //           << i * vertices_per_side + j + 1UL << " "
+            //           << i * vertices_per_side + j + (vertices_per_side + 1UL) << std::endl;
+
+            indices.at(n + 3UL) = i * vertices_per_side + j;       // X
+            indices.at(n + 4UL) = i * vertices_per_side + j + (vertices_per_side + 1UL); // Y
+            indices.at(n + 5UL) = i * vertices_per_side + j + (vertices_per_side + 0UL); // Z
+
+            // std::cout << i * vertices_per_side + j << " "
+            //           << i * vertices_per_side + j + (vertices_per_side + 1UL) << " "
+            //           << i * vertices_per_side + j + (vertices_per_side + 0UL) << std::endl;
+
+            n += 6UL;
+        }
+    }
+}
+
+void render_sphere_via_cube_map()
+{
+    Window window("Cube Map Sphere", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+    window.enable_wireframe();
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    window.register_imgui();
+    ImGui_ImplOpenGL3_Init("#version 410 core");
+
+    // Subdivision to Vertices
+    // 0 24
+    // 1 66
+    // 2 120
+
+    // Subdivisions to Indices
+    // 0 24
+    // 1
+    // 2
+
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+    generate_cube_with_subdivisions(vertices, indices, 2);
+
+    Mesh mesh;
+    mesh.bind();
+    mesh.load_vertex_buffer(vertices);
+    mesh.load_index_buffer(indices);
+    mesh.set_vertex_buffer_attribute(0, 3, 0); // Mark the X/Y/Z vertices
+
+
+    Program program;
+    program.load_vertex_shader("shaders/vertex/cube-map.vert");
+    program.load_fragment_shader("shaders/fragment/cube-map.frag");
+    program.link();
+
+    program.use();
+
+    glm::mat4 transformation(1.0f);
+    glm::mat4 rotation(1.0f);
+    glm::mat4 scale(1.0f);
+    glm::mat4 model(1.0f);
+
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
+
+    glm::mat4 mvp(1.0f);
+
+    while(no_signals_have_been_raised() && window.should_not_close())
+    {
+        // IO Logic
+        window.poll_input();
+
+        // Make sure tha the mouse events aren't happneing in the UI
+        if(io.WantCaptureMouse == false)
+        {
+
+        }
+
+        // UI Logic
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Hello World!");
+
+            ImGui::End();
+        }
+
+        // Render Logic
+        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
+        window.clear_buffer_bits();
+
+        program.use();
+
+        model = transformation * rotation * scale;
+        mvp = projection * view * model;
+
+        program.set_uniform_mat4("mvp", mvp);
+
+        mesh.bind();
+        mesh.draw();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Swap the windows
+        window.swap_buffers();
+    }
+
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void render_sphere_via_geographic_grid()
+{
+    Window window("Geographic Grid Sphere", 768UL, 1024UL);
+    window.enable_vsync();
+    window.enable_depth_test();
+    window.enable_backface_culling();
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    window.register_imgui();
+    ImGui_ImplOpenGL3_Init("#version 410 core");
+
+    Mesh mesh;
+    mesh.bind();
+    // Generate vector of vertices for the cube
+    // Front face:
+    // 0 0.0, 0.0, 0.0
+    // 1 1.0, 0.0, 0.0
+    // 2 1.0, 1.0, 0.0
+    // 3 0.0, 1.0, 0.0
+
+    // Indices are: 0 1 2 / 0 2 3
+
+    // Right face
+    // 1 1.0, 0.0,  0.0,
+    // 4 1.0, 0.0, -1.0,
+    // 5 1.0, 1.0, -1.0,
+    // 2 1.0, 1.0,  0.0
+
+    // Indices are: 1 4 5 / 1 5 2
+
+    // Back Face
+    // 4 1.0, 0.0, -1.0
+    // 6 0.0, 0.0, -1.0
+    // 7 0.0, 1.0, -1.0
+    // 5 1.0, 1.0, -1.0
+
+    // Indices are 4 6 7 / 4 7 5
+
+    // Left Face
+    // 6 0.0, 0.0, -1.0
+    // 0 0.0, 0.0,  0.0
+    // 3 0.0, 1.0,  0.0
+    // 7 0.0, 1.0, -1.0
+
+    // Indices are 6 0 3 / 6 3 7
+
+    // Top Face
+    // 3 0.0, 1.0,  0.0
+    // 2 1.0, 1.0,  0.0
+    // 5 1.0, 1.0, -1.0
+    // 7 0.0, 1.0, -1.0
+
+    // Indices are 3 2 5 / 3 5 7
+
+    // Bottom Face
+    // 0 0.0, 0.0,  0.0
+    // 1 1.0, 0.0,  0.0
+    // 4 1.0, 0.0, -1.0
+    // 6 0.0, 0.0, -1.0
+
+    // Indices are 0 1 4 / 0 4 6
+
+
+    // Index generation is very simple... 0,1,2 / 0,2,3 for each ID'd square
+
+    // 0 0.0, 0.0,  0.0
+    // 1 1.0, 0.0,  0.0
+    // 2 1.0, 1.0,  0.0
+    // 3 0.0, 1.0,  0.0
+    // 4 0.0, 0.0, -1.0
+    // 5 1.0, 0.0, -1.0
+    // 6 1.0, 1.0, -1.0
+    // 7 0.0, 1.0, -1.0
+
+    // Two passes
+    // First generates all of the vertices and loads them into a buffer
+    // Second pass generates all of the indices and loads them into a buffer
+
+    Program program;
+    program.load_vertex_shader("shaders/vertex/cube-map.vert");
+    program.load_fragment_shader("shaders/fragment/cube-map.frag");
+    program.link();
+
+    program.use();
+
+    glm::mat4 transformation(1.0f);
+    glm::mat4 rotation(1.0f);
+    glm::mat4 scale(1.0f);
+    glm::mat4 model(1.0f);
+
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
+
+    glm::mat4 mvp(1.0f);
+
+    while(no_signals_have_been_raised() && window.should_not_close())
+    {
+        // IO Logic
+        window.poll_input();
+
+        // Make sure tha the mouse events aren't happneing in the UI
+        if(io.WantCaptureMouse == false)
+        {
+
+        }
+
+        // UI Logic
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Hello World!");
+
+            ImGui::End();
+        }
+
+        // Render Logic
+        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
+        window.clear_buffer_bits();
+
+        program.use();
+
+        model = transformation * rotation * scale;
+        mvp = projection * view * model;
+
+        program.set_uniform_mat4("mvp", mvp);
+
+        mesh.bind();
+        mesh.draw();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Swap the windows
+        window.swap_buffers();
+    }
+
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+int main(int, char**)
+{
+    setup_signal_handlers();
+
+    // render_sphere_via_subdivided_tetrahedron();
+    render_sphere_via_cube_map();
 
     return EXIT_SUCCESS;
 }

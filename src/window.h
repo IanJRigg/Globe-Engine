@@ -55,6 +55,9 @@ public:
                      const float alpha) const;
     void clear_buffer_bits() const;
 
+    void enable_wireframe() const;
+    void disable_wireframe() const;
+
     void enable_depth_test() const;
     void disable_depth_test() const;
 

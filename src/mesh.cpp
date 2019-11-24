@@ -1,4 +1,4 @@
-#include "buffer-controller.h"
+#include "mesh.h"
 
 #include <iostream>
 #include <iomanip>
@@ -6,7 +6,7 @@
 /**********************************************************************************************//**
  * \brief Default constructor
  *************************************************************************************************/
-Buffer_Controller::Buffer_Controller() :
+Mesh::Mesh() :
     m_vao(0U),
     m_vbo(0U),
     m_ebo(0U),
@@ -23,7 +23,7 @@ Buffer_Controller::Buffer_Controller() :
 /**********************************************************************************************//**
  * \brief Default destructor
  *************************************************************************************************/
-Buffer_Controller::~Buffer_Controller()
+Mesh::~Mesh()
 {
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(1, &m_vbo);
@@ -34,7 +34,7 @@ Buffer_Controller::~Buffer_Controller()
  * \brief Move constructor
  * \param other rvalue reference to another program object
  *************************************************************************************************/
-Buffer_Controller::Buffer_Controller(Buffer_Controller&& other) noexcept :
+Mesh::Mesh(Mesh&& other) noexcept :
     m_vao(0U),
     m_vbo(0U),
     m_ebo(0U),
@@ -50,7 +50,7 @@ Buffer_Controller::Buffer_Controller(Buffer_Controller&& other) noexcept :
  * \brief Move assignment operator
  * \param other rvalue reference to another program object
  *************************************************************************************************/
-Buffer_Controller& Buffer_Controller::operator=(Buffer_Controller&& other) noexcept
+Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
     if(this != &other)
     {
@@ -69,7 +69,7 @@ Buffer_Controller& Buffer_Controller::operator=(Buffer_Controller&& other) noexc
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-void Buffer_Controller::bind() const
+void Mesh::bind() const
 {
     glBindVertexArray(m_vao);
 }
@@ -77,7 +77,7 @@ void Buffer_Controller::bind() const
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-void Buffer_Controller::draw() const
+void Mesh::draw() const
 {
     if(m_index_count == 0)
     {
@@ -93,7 +93,7 @@ void Buffer_Controller::draw() const
  * \brief
  * \param vertices
  *************************************************************************************************/
-void Buffer_Controller::load_array_buffer(const std::vector<float>& vertices)
+void Mesh::load_vertex_buffer(const std::vector<float>& vertices)
 {
     m_vertex_buffer_size = vertices.size();
 
@@ -103,9 +103,21 @@ void Buffer_Controller::load_array_buffer(const std::vector<float>& vertices)
 
 /**********************************************************************************************//**
  * \brief
+ * \param vertices
+ *************************************************************************************************/
+void Mesh::load_vertex_buffer(const float* vertices, const uint32_t length)
+{
+    m_vertex_buffer_size = length;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer_size * sizeof(float), vertices, GL_STATIC_DRAW);
+}
+
+/**********************************************************************************************//**
+ * \brief
  * \param indices
  *************************************************************************************************/
-void Buffer_Controller::load_element_array_buffer(const std::vector<uint32_t>& indices)
+void Mesh::load_index_buffer(const std::vector<uint32_t>& indices)
 {
     m_index_count = indices.size();
 
@@ -119,9 +131,9 @@ void Buffer_Controller::load_element_array_buffer(const std::vector<uint32_t>& i
  * \param size
  * \param offset
  *************************************************************************************************/
-void Buffer_Controller::set_array_attribute(const uint32_t index,
-                                            const uint32_t size,
-                                            const uint32_t offset)
+void Mesh::set_vertex_buffer_attribute(const uint32_t index,
+                                       const uint32_t size,
+                                       const uint32_t offset)
 {
     glVertexAttribPointer(index,
                           size,

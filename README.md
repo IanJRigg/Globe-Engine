@@ -15,7 +15,13 @@ The following tools are used in conjunction with the project:
 
 
 ## TODOs
-- Look into algorithms for rendering a globe
-- BlueMarble Integration?
-- Make IMGUI look better
+- Create a camera class
+- 
+- Develop a subdivision surfaces algorithm
+- Develop a cube map algorithm
+- Develop a geographic grid algorithm
+- Make IMGUI look better? Better font, and some color theory would go far
 - Make IMGUI Compile into a separate static lib
+- Find a texturing library that can be used to render the earth
+- Click and drag algorithm can be changed such that the camera is translating, not the globe. This can be used to adjust LOD as well
+- 
