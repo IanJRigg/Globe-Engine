@@ -65,7 +65,7 @@ public:
     void disable_depth_test() const;
 
     void enable_backface_culling() const;
-    void disable_backfase_culling() const;
+    void disable_backface_culling() const;
 
 private:
     GLFWwindow* m_window_pointer;

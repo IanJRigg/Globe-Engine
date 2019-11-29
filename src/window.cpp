@@ -405,7 +405,7 @@ void Window::enable_backface_culling() const
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-void Window::disable_backfase_culling() const
+void Window::disable_backface_culling() const
 {
     glDisable(GL_CULL_FACE);
 }

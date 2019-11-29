@@ -17,8 +17,8 @@ public:
 
     glm::mat4 look_at() const;
 
-    void set_zoom(const float zoom);
-    float zoom() const;
+    void set_fov(const float zoom);
+    float fov() const;
 
 private:
 
@@ -27,7 +27,7 @@ public:
     glm::vec3 rotation;
 
 private:
-    float m_zoom;
+    float m_fov;
 };
 
 #endif

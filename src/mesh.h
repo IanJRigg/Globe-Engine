@@ -19,6 +19,8 @@ public:
     Mesh& operator=(Mesh&& other) noexcept;
 
     void bind() const;
+    void unbind() const;
+
     void draw() const;
 
     void load_vertex_buffer(const std::vector<float>& vertices);

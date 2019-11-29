@@ -196,6 +196,7 @@ static void setup_signal_handlers()
 #include <glm/gtc/type_ptr.hpp>
 
 #include "camera.h"
+#include "planet-generator.h"
 #include "program.h"
 #include "texture.h"
 #include "mesh.h"
@@ -206,8 +207,10 @@ static void setup_signal_handlers()
 #include "imgui/imgui_impl_opengl3.h"
 
 #include <cmath>
+#include <iomanip>
 
-const std::vector<float> cube_vertices {
+const std::vector<float> cube_vertices_with_duplicates
+{
 //    Positions               Colors                 Texture coords
       -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
        0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,    1.0f, 1.0f,
@@ -252,19 +255,109 @@ const std::vector<float> cube_vertices {
       -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,    0.0f, 0.0f
 };
 
+const std::vector<float> cube_vertices_without_params
+{
+//    Positions
+       0.0f,  0.0f,  0.0f,  // Back Side, bottom right
+       1.0f,  0.0f,  0.0f,  // Back Side, bottom left
+       0.0f,  1.0f,  0.0f,  // Back Side, top right
+       1.0f,  1.0f,  0.0f,  // Back Side, top left
+
+       0.0f,  0.0f,  1.0f,  // Front Side, bottom left
+       1.0f,  0.0f,  1.0f,  // Front Side, bottom right
+       0.0f,  1.0f,  1.0f,  // Front Side, top left
+       1.0f,  1.0f,  1.0f,  // Front Side, top right
+
+       0.0f,  0.0f,  0.0f,  // Left Side, bottom left
+       0.0f,  0.0f,  1.0f,  // Left Side, bottom right
+       0.0f,  1.0f,  1.0f,  // Left Side, top right
+       0.0f,  1.0f,  0.0f,  // Left Side, top left
+
+       1.0f,  0.0f,  1.0f,  // Right Side, bottom left
+       1.0f,  0.0f,  0.0f,  // Right Side, bottom right
+       1.0f,  1.0f,  0.0f,  // Right Side, top right
+       1.0f,  1.0f,  1.0f,  // Right Side, top left
+
+       0.0f,  0.0f,  0.0f,  // Bottom Side, bottom left
+       1.0f,  0.0f,  0.0f,  // Bottom Side, bottom right
+       1.0f,  0.0f,  1.0f,  // Bottom Side, top right
+       0.0f,  0.0f,  1.0f,  // Bottom Side, top left
+
+       0.0f,  1.0f,  1.0f,  // Top Side, bottom left
+       1.0f,  1.0f,  1.0f,  // Top Side, bottom right
+       1.0f,  1.0f,  0.0f,  // Top Side, top right
+       0.0f,  1.0f,  0.0f  // Top Side, top left
+};
+
+const std::vector<float> cube_vertices
+{
+//    Positions               Texture coords
+       0.0f,  0.0f,  0.0f,    0.0f, 0.0f, // Back Side, bottom right
+       1.0f,  0.0f,  0.0f,    1.0f, 0.0f, // Back Side, bottom left
+       0.0f,  1.0f,  0.0f,    0.0f, 1.0f, // Back Side, top right
+       1.0f,  1.0f,  0.0f,    1.0f, 1.0f, // Back Side, top left
+
+       0.0f,  0.0f,  1.0f,    0.0f, 0.0f, // Front Side, bottom left
+       1.0f,  0.0f,  1.0f,    1.0f, 0.0f, // Front Side, bottom right
+       0.0f,  1.0f,  1.0f,    0.0f, 1.0f, // Front Side, top left
+       1.0f,  1.0f,  1.0f,    1.0f, 1.0f, // Front Side, top right
+
+       0.0f,  0.0f,  0.0f,    0.0f, 1.0f, // Left Side, bottom left
+       0.0f,  0.0f,  1.0f,    0.0f, 0.0f, // Left Side, bottom right
+       0.0f,  1.0f,  1.0f,    1.0f, 0.0f, // Left Side, top right
+       0.0f,  1.0f,  0.0f,    1.0f, 1.0f, // Left Side, top left
+
+       1.0f,  0.0f,  1.0f,    0.0f, 0.0f, // Right Side, bottom left
+       1.0f,  0.0f,  0.0f,    0.0f, 1.0f, // Right Side, bottom right
+       1.0f,  1.0f,  0.0f,    1.0f, 1.0f, // Right Side, top right
+       1.0f,  1.0f,  1.0f,    1.0f, 0.0f, // Right Side, top left
+
+       0.0f,  0.0f,  0.0f,    0.0f, 1.0f, // Bottom Side, bottom left
+       1.0f,  0.0f,  0.0f,    1.0f, 1.0f, // Bottom Side, bottom right
+       1.0f,  0.0f,  1.0f,    1.0f, 0.0f, // Bottom Side, top right
+       0.0f,  0.0f,  1.0f,    0.0f, 0.0f, // Bottom Side, top left
+
+       0.0f,  1.0f,  1.0f,    0.0f, 0.0f, // Top Side, bottom left
+       1.0f,  1.0f,  1.0f,    1.0f, 0.0f, // Top Side, bottom right
+       1.0f,  1.0f,  0.0f,    1.0f, 1.0f, // Top Side, top right
+       0.0f,  1.0f,  0.0f,    0.0f, 1.0f  // Top Side, top left
+};
+
+std::vector<uint32_t> cube_indices
+{
+    1, 0, 2,
+    1, 2, 3,
+
+    4, 5, 7,
+    4, 7, 6,
+
+    8, 9, 10,
+    8, 10, 11,
+
+    12, 13, 14,
+    12, 14, 15,
+
+    16, 17, 18,
+    16, 18, 19,
+
+    20, 21, 22,
+    20, 22, 23
+};
+
 void render_cube()
 {
-    Window window("Render Cube", 768UL, 1024UL);
+    Window window("Render Cube", 768UL, 1280UL);
     window.enable_vsync();
     window.enable_depth_test();
+    //window.enable_wireframe();
     window.enable_backface_culling();
 
-    IMGUI_CHECKVERSION();
+    // IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 
-    // Setup Dear ImGui style
+    // // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer bindings
@@ -273,18 +366,17 @@ void render_cube()
 
     Mesh mesh;
     mesh.bind();
-    mesh.load_vertex_buffer(cube_vertices);
+    mesh.load_vertex_buffer(cube_vertices_without_params);
+    mesh.load_index_buffer(cube_indices);
     mesh.set_vertex_buffer_attribute(0, 3, 0);
-    mesh.set_vertex_buffer_attribute(1, 3, 3);
-    mesh.set_vertex_buffer_attribute(2, 2, 6);
 
-    Texture_2D texture;
-    texture.bind();
-    texture.load_jpg("textures/container.jpg");
-    texture.set_s_axis_to_repeat();
-    texture.set_t_axis_to_repeat();
-    texture.set_minifying_filter_to_nearest();
-    texture.set_magnifying_filter_to_nearest();
+    // Texture_2D texture;
+    // texture.bind();
+    // texture.load_jpg("textures/container.jpg");
+    // texture.set_s_axis_to_repeat();
+    // texture.set_t_axis_to_repeat();
+    // texture.set_minifying_filter_to_nearest();
+    // texture.set_magnifying_filter_to_nearest();
 
     Program program;
     program.load_vertex_shader("shaders/vertex/cube.vert");
@@ -293,25 +385,23 @@ void render_cube()
 
     program.use();
 
-    program.set_uniform_integer("texture1", 0);
+    //program.set_uniform_integer("texture1", 0);
 
-    glm::mat4 transformation(1.0f);
+    Camera camera;
+    camera.position.z = 2.0f;
+
 
     glm::vec3 x_axis(1.0f, 0.0f, 0.0f);
     glm::vec3 y_axis(0.0f, 1.0f, 0.0f);
     glm::vec3 rotation_axis(0.0f, 0.0f, 0.0f);
+
+    glm::mat4 transformation(1.0f);
     glm::mat4 rotation(1.0f);
-
     glm::mat4 scale(1.0f);
+
     glm::mat4 model(1.0f);
-
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
+    glm::mat4 view = camera.look_at();
+    glm::mat4 projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
 
     glm::mat4 mvp(1.0f);
 
@@ -399,6 +489,11 @@ void render_cube()
 
             ImGui::Text("Rotation: %.2f | %.2f | %.2f", cube_angles.x, cube_angles.y, cube_angles.z);
 
+            ImGui::Text("Position: %.2f | %.2f | %.2f", camera.position.x, camera.position.y, camera.position.z);
+
+            ImGui::SliderFloat("X Position", &camera.position.x, -10.0f, 10.0f);
+            ImGui::SliderFloat("Y Position", &camera.position.y, -10.0f, 10.0f);
+            ImGui::SliderFloat("Z Position", &camera.position.z, -10.0f, 10.0f);
 
             ImGui::Separator();
 
@@ -410,12 +505,16 @@ void render_cube()
         window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
         window.clear_buffer_bits();
 
-        texture.set_active_texture(GL_TEXTURE0);
-        texture.bind();
+        // texture.set_active_texture(GsL_TEXTURE0);
+        // texture.bind();
 
         program.use();
 
         model = transformation * rotation * scale;
+
+        view = camera.look_at();
+        projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
+
         mvp = projection * view * model;
 
         program.set_uniform_mat4("mvp", mvp);
@@ -436,228 +535,7 @@ void render_cube()
     ImGui::DestroyContext();
 }
 
-void generate_subdivided_tetrahedron(std::vector<float>& vertices, std::vector<uint32_t>& indices, const uint32_t level)
-{
-    const float root_two_over_three = sqrt(2.0) / 3.0;
-    const float one_third = -(1.0 / 3.0);
-    const float root_six_over_three = sqrt(6.0) / 3.0;
-
-    vertices.reserve(pow(4.0, level + 1));
-}
-
-void subdivide(std::vector<float>& vertices, std::vector<uint32_t>& indices, const uint32_t level)
-{
-    if(level > 0)
-    {
-        subdivide(vertices, indices, level - 1);
-    }
-    else
-    {
-
-    }
-}
-
-void render_sphere_via_subdivided_tetrahedron()
-{
-    Window window("Subdivision Surfaces Sphere", 768UL, 1024UL);
-    window.enable_vsync();
-    window.enable_depth_test();
-    // window.enable_backface_culling();
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // Setup Platform/Renderer bindings
-    window.register_imgui();
-    ImGui_ImplOpenGL3_Init("#version 410 core");
-
-    std::vector<float> vertices;
-    std::vector<uint32_t> indices;
-    generate_subdivided_tetrahedron(vertices, indices, 1);
-
-    Mesh mesh;
-    mesh.bind();
-    mesh.load_vertex_buffer(vertices);
-    mesh.load_index_buffer(indices);
-    mesh.set_vertex_buffer_attribute(0, 3, 0); // Mark the X/Y/Z vertices
-
-    Program program;
-    program.load_vertex_shader("shaders/vertex/cube-map.vert");
-    program.load_fragment_shader("shaders/fragment/cube-map.frag");
-    program.link();
-
-    program.use();
-
-    glm::mat4 transformation(1.0f);
-    glm::mat4 rotation(1.0f);
-    glm::mat4 scale(1.0f);
-    glm::mat4 model(1.0f);
-
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
-
-    glm::mat4 mvp(1.0f);
-
-    while(no_signals_have_been_raised() && window.should_not_close())
-    {
-        // IO Logic
-        window.poll_input();
-
-        // Make sure tha the mouse events aren't happneing in the UI
-        if(io.WantCaptureMouse == false)
-        {
-
-        }
-
-        // UI Logic
-        {
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            ImGui::Begin("Hello World!");
-
-            ImGui::End();
-        }
-
-        // Render Logic
-        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
-        window.clear_buffer_bits();
-
-        program.use();
-
-        model = transformation * rotation * scale;
-        mvp = projection * view * model;
-
-        program.set_uniform_mat4("mvp", mvp);
-
-        mesh.bind();
-        mesh.draw();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        // Swap the windows
-        window.swap_buffers();
-    }
-
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void generate_cube_with_subdivisions(std::vector<float>& vertices,
-                                     std::vector<uint32_t>& indices,
-                                     const uint32_t number_of_subdivisions)
-{
-    const uint32_t vertices_per_side = number_of_subdivisions + 2;
-
-    vertices.resize(vertices_per_side * vertices_per_side * 3, 0.0f);
-
-    float step = 1.0 / (vertices_per_side - 1UL);
-    uint32_t n = 0UL;
-
-    for(uint32_t i = 0; i < vertices_per_side; i++)
-    {
-        for(uint32_t j = 0; j < vertices_per_side; j++)
-        {
-            vertices.at(n + 0UL) = j * step; // X
-            vertices.at(n + 1UL) = i * step; // Y
-            vertices.at(n + 2UL) = 0.0f;     // Z
-
-            //std::cout << j * step << " " << i * step << " " << 0.0 << std::endl;
-
-            n += 3UL;
-        }
-    }
-
-    n = 0UL;
-
-
-    // Number of Subdivisions: 1
-
-    // Vertices
-    // 6 7 8
-    // 3 4 5
-    // 0 1 2
-
-    // Indices
-    // 0 1 4   i = 0; j = 0;
-    // 0 4 3   i = 0; j = 0l
-    // 1 2 5   i = 0; j = 1;
-    // 1 5 4   i = 0; j = 1;
-    // 3 4 7   i = 1; j = 0;
-    // 3 7 6   i = 1; j = 0;
-    // 4 5 8   i = 1; j = 1;
-    // 4 8 7   i = 1; j = 1;
-
-
-    // NUmber of Subdivisions: 2
-
-    // C D E F
-    // 8 9 A B
-    // 4 5 6 7
-    // 0 1 2 3
-
-    // Indices
-    // 0 1 5   i = 0; j = 0;
-    // 0 5 4   i = 0; j = 0;
-    // 1 2 6   i = 0; j = 1;
-    // 1 6 5   i = 0; j = 1;
-    // 2 3 7   i = 0; j = 2;
-    // 2 7 6   i = 0; j = 2;
-    // 4 5 9   i = 1; j = 0;
-    // 4 9 8   i = 1; j = 0;
-    // 5 6 A   i = 1; j = 1;
-    // 5 A 9   i = 1; j = 1;
-    // 6 7 B   i = 1; j = 2;
-    // 6 B A   i = 1; j = 2;
-    // 8 9 D   i = 2; j = 0;
-    // 8 D C   i = 2; j = 0;
-    // 9 A E   i = 2; j = 1;
-    // 9 E D   i = 2; j = 1;
-    // A B F   i = 2; j = 2;
-    // A F E   i = 2; j = 2;
-
-    std::cout << std::endl;
-
-    indices.resize((vertices_per_side - 1) * (vertices_per_side - 1) * 6, 0UL);
-
-    for(uint32_t i = 0; i < vertices_per_side - 1; ++i)
-    {
-        for(uint32_t j = 0; j < vertices_per_side - 1; ++j)
-        {
-            indices.at(n + 0UL) = i * vertices_per_side + j;       // X
-            indices.at(n + 1UL) = i * vertices_per_side + j + 1UL; // Y
-            indices.at(n + 2UL) = i * vertices_per_side + j + (vertices_per_side + 1UL); // Z
-
-            // std::cout << i * vertices_per_side + j << " "
-            //           << i * vertices_per_side + j + 1UL << " "
-            //           << i * vertices_per_side + j + (vertices_per_side + 1UL) << std::endl;
-
-            indices.at(n + 3UL) = i * vertices_per_side + j;       // X
-            indices.at(n + 4UL) = i * vertices_per_side + j + (vertices_per_side + 1UL); // Y
-            indices.at(n + 5UL) = i * vertices_per_side + j + (vertices_per_side + 0UL); // Z
-
-            // std::cout << i * vertices_per_side + j << " "
-            //           << i * vertices_per_side + j + (vertices_per_side + 1UL) << " "
-            //           << i * vertices_per_side + j + (vertices_per_side + 0UL) << std::endl;
-
-            n += 6UL;
-        }
-    }
-}
+#include <iomanip>
 
 void render_sphere_via_cube_map()
 {
@@ -681,14 +559,13 @@ void render_sphere_via_cube_map()
 
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
-    generate_cube_with_subdivisions(vertices, indices, 100);
+    generate_cube_with_subdivisions(vertices, indices, 256);
 
     Mesh mesh;
     mesh.bind();
     mesh.load_vertex_buffer(vertices);
     mesh.load_index_buffer(indices);
     mesh.set_vertex_buffer_attribute(0, 3, 0); // Mark the X/Y/Z vertices
-
 
     Program program;
     program.load_vertex_shader("shaders/vertex/cube-map.vert");
@@ -698,7 +575,7 @@ void render_sphere_via_cube_map()
     program.use();
 
     Camera camera;
-    camera.position.z = 2.0f;
+    camera.position.z = 1.5f;
 
     glm::mat4 transformation(1.0f);
     glm::mat4 rotation(1.0f);
@@ -706,7 +583,7 @@ void render_sphere_via_cube_map()
 
     glm::mat4 model(1.0f);
     glm::mat4 view = camera.look_at();
-    glm::mat4 projection = glm::perspective(glm::radians(camera.zoom()), window.aspect_ratio(), 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
 
     glm::mat4 mvp(1.0f);
 
@@ -729,178 +606,21 @@ void render_sphere_via_cube_map()
 
             ImGui::Begin("Hello World!");
 
+            ImGui::SliderFloat("X Position", &camera.position.x, -10.0f, 10.0f);
+            ImGui::SliderFloat("Y Position", &camera.position.y, -10.0f, 10.0f);
             ImGui::SliderFloat("Z Position", &camera.position.z, -10.0f, 10.0f);
 
             ImGui::End();
         }
 
-        std::cout << camera.position.z << std::endl;
-
         // Render Logic
-        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
+        window.clear_color(0.1f, 0.1f, 0.1f, 1.0f);
         window.clear_buffer_bits();
 
         program.use();
 
         view = camera.look_at();
-        projection = glm::perspective(glm::radians(camera.zoom()), window.aspect_ratio(), 0.1f, 100.0f);
-
-        model = transformation * rotation * scale;
-        mvp = projection * view * model;
-
-        program.set_uniform_mat4("mvp", mvp);
-
-        mesh.bind();
-        mesh.draw();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        // Swap the windows
-        window.swap_buffers();
-    }
-
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void render_sphere_via_geographic_grid()
-{
-    Window window("Geographic Grid Sphere", 768UL, 1024UL);
-    window.enable_vsync();
-    window.enable_depth_test();
-    window.enable_backface_culling();
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // Setup Platform/Renderer bindings
-    window.register_imgui();
-    ImGui_ImplOpenGL3_Init("#version 410 core");
-
-    Mesh mesh;
-    mesh.bind();
-    // Generate vector of vertices for the cube
-    // Front face:
-    // 0 0.0, 0.0, 0.0
-    // 1 1.0, 0.0, 0.0
-    // 2 1.0, 1.0, 0.0
-    // 3 0.0, 1.0, 0.0
-
-    // Indices are: 0 1 2 / 0 2 3
-
-    // Right face
-    // 1 1.0, 0.0,  0.0,
-    // 4 1.0, 0.0, -1.0,
-    // 5 1.0, 1.0, -1.0,
-    // 2 1.0, 1.0,  0.0
-
-    // Indices are: 1 4 5 / 1 5 2
-
-    // Back Face
-    // 4 1.0, 0.0, -1.0
-    // 6 0.0, 0.0, -1.0
-    // 7 0.0, 1.0, -1.0
-    // 5 1.0, 1.0, -1.0
-
-    // Indices are 4 6 7 / 4 7 5
-
-    // Left Face
-    // 6 0.0, 0.0, -1.0
-    // 0 0.0, 0.0,  0.0
-    // 3 0.0, 1.0,  0.0
-    // 7 0.0, 1.0, -1.0
-
-    // Indices are 6 0 3 / 6 3 7
-
-    // Top Face
-    // 3 0.0, 1.0,  0.0
-    // 2 1.0, 1.0,  0.0
-    // 5 1.0, 1.0, -1.0
-    // 7 0.0, 1.0, -1.0
-
-    // Indices are 3 2 5 / 3 5 7
-
-    // Bottom Face
-    // 0 0.0, 0.0,  0.0
-    // 1 1.0, 0.0,  0.0
-    // 4 1.0, 0.0, -1.0
-    // 6 0.0, 0.0, -1.0
-
-    // Indices are 0 1 4 / 0 4 6
-
-
-    // Index generation is very simple... 0,1,2 / 0,2,3 for each ID'd square
-
-    // 0 0.0, 0.0,  0.0
-    // 1 1.0, 0.0,  0.0
-    // 2 1.0, 1.0,  0.0
-    // 3 0.0, 1.0,  0.0
-    // 4 0.0, 0.0, -1.0
-    // 5 1.0, 0.0, -1.0
-    // 6 1.0, 1.0, -1.0
-    // 7 0.0, 1.0, -1.0
-
-    // Two passes
-    // First generates all of the vertices and loads them into a buffer
-    // Second pass generates all of the indices and loads them into a buffer
-
-    Program program;
-    program.load_vertex_shader("shaders/vertex/cube-map.vert");
-    program.load_fragment_shader("shaders/fragment/cube-map.frag");
-    program.link();
-
-    program.use();
-
-    glm::mat4 transformation(1.0f);
-    glm::mat4 rotation(1.0f);
-    glm::mat4 scale(1.0f);
-    glm::mat4 model(1.0f);
-
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (4.0f/3.0f), 0.1f, 100.0f);
-
-    glm::mat4 mvp(1.0f);
-
-    while(no_signals_have_been_raised() && window.should_not_close())
-    {
-        // IO Logic
-        window.poll_input();
-
-        // Make sure tha the mouse events aren't happneing in the UI
-        if(io.WantCaptureMouse == false)
-        {
-
-        }
-
-        // UI Logic
-        {
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            ImGui::Begin("Hello World!");
-
-            ImGui::End();
-        }
-
-        // Render Logic
-        window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
-        window.clear_buffer_bits();
-
-        program.use();
+        projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
 
         model = transformation * rotation * scale;
         mvp = projection * view * model;
@@ -927,7 +647,8 @@ int main(int, char**)
 {
     setup_signal_handlers();
 
-    // render_sphere_via_subdivided_tetrahedron();
+    // render_cube();
+
     render_sphere_via_cube_map();
 
     return EXIT_SUCCESS;

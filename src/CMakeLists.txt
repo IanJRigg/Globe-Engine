@@ -14,6 +14,7 @@ set(SOURCE_FILES
     camera.cpp
     main.cpp
     mesh.cpp
+    planet-generator.cpp
     program.cpp
     texture.cpp
     window.cpp
@@ -30,6 +31,7 @@ set(HEADER_FILES
     fragment-shader.h
     vertex-shader.h
     mesh.h
+    planet-generator.h
     program.h
     texture.h
     window.h

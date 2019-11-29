@@ -12,7 +12,7 @@ static const glm::vec3 Y_AXIS(0.0f, 1.0f, 0.0f);
 Camera::Camera() :
     position(0.0f, 0.0f, 0.0f),
     rotation(0.0f, 0.0f, 0.0f),
-    m_zoom(45.0f)
+    m_fov(90.0f)
 {
 
 }
@@ -31,7 +31,7 @@ Camera::~Camera()
 Camera::Camera(const Camera& other) :
     position(other.position),
     rotation(other.rotation),
-    m_zoom(other.m_zoom)
+    m_fov(other.m_fov)
 {
 
 }
@@ -53,7 +53,7 @@ Camera& Camera::operator=(const Camera& other)
     {
         position = other.position;
         rotation = other.rotation;
-        m_zoom = other.m_zoom;
+        m_fov = other.m_fov;
     }
 
     return *this;
@@ -69,7 +69,7 @@ Camera& Camera::operator=(Camera&& other) noexcept
         position = std::move(other.position);
         rotation = std::move(other.rotation);
 
-        std::swap(m_zoom, other.m_zoom);
+        std::swap(m_fov, other.m_fov);
     }
 
     return *this;
@@ -93,17 +93,20 @@ glm::mat4 Camera::look_at() const
 
 /**********************************************************************************************//**
  * \brief
- * \param zoom
+ * \param fov
  *************************************************************************************************/
-void Camera::set_zoom(const float zoom)
+void Camera::set_fov(const float fov)
 {
-
+    if(fov >= 0.0f && fov <= 180.0f)
+    {
+        m_fov = fov;
+    }
 }
 
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-float Camera::zoom() const
+float Camera::fov() const
 {
-
+   return m_fov;
 }

@@ -77,14 +77,24 @@ void Mesh::bind() const
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
+void Mesh::unbind() const
+{
+    glBindVertexArray(0);
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
 void Mesh::draw() const
 {
     if(m_index_count == 0)
     {
+        //glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
         glDrawArrays(GL_TRIANGLES, 0, m_vertex_count);
     }
     else
     {
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
         glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, nullptr);
     }
 }
@@ -121,6 +131,8 @@ void Mesh::load_index_buffer(const std::vector<uint32_t>& indices)
 {
     m_index_count = indices.size();
 
+    // TODO: The stride needs to be updated for every element
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_index_count * sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
 }
@@ -135,16 +147,16 @@ void Mesh::set_vertex_buffer_attribute(const uint32_t index,
                                        const uint32_t size,
                                        const uint32_t offset)
 {
+    m_attribute_count += size;
+    m_vertex_count = m_vertex_buffer_size / m_attribute_count;
+
     glVertexAttribPointer(index,
                           size,
                           GL_FLOAT,
                           GL_FALSE,
-                          8 * sizeof(float),
+                          m_attribute_count * sizeof(float),
                           (void*)(offset * sizeof(float))
     );
 
     glEnableVertexAttribArray(index);
-
-    m_attribute_count += size;
-    m_vertex_count = m_vertex_buffer_size / m_attribute_count;
 }
