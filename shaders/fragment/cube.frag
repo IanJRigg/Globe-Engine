@@ -1,8 +1,12 @@
 #version 410 core
 
+in vec3 textureDir;
+
 out vec4 FragColor;
+
+uniform samplerCube cubemap;
 
 void main()
 {
-    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    FragColor = texture(cubemap, textureDir);
 }

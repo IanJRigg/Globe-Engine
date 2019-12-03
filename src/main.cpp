@@ -505,7 +505,7 @@ void render_cube()
         window.clear_color(0.2f, 0.3f, 0.3f, 1.0f);
         window.clear_buffer_bits();
 
-        // texture.set_active_texture(GsL_TEXTURE0);
+        // texture.set_active_texture(GL_TEXTURE0);
         // texture.bind();
 
         program.use();
@@ -535,11 +535,9 @@ void render_cube()
     ImGui::DestroyContext();
 }
 
-#include <iomanip>
-
 void render_sphere_via_cube_map()
 {
-    Window window("Cube Map Sphere", 768UL, 1024UL);
+    Window window("Cube Map Sphere", 1534UL, 2048UL);
     window.enable_vsync();
     window.enable_depth_test();
     window.enable_backface_culling();
@@ -567,12 +565,22 @@ void render_sphere_via_cube_map()
     mesh.load_index_buffer(indices);
     mesh.set_vertex_buffer_attribute(0, 3, 0); // Mark the X/Y/Z vertices
 
+    Texture texture;
+    texture.bind_with_cube_map_as_target();
+    texture.load_cube_map_png("textures/awesomeface.png");
+    texture.set_magnifying_filter_to_linear();
+    texture.set_minifying_filter_to_linear();
+    texture.set_s_axis_to_clamp_to_edge();
+    texture.set_t_axis_to_clamp_to_edge();
+    texture.set_r_axis_to_clamp_to_edge();
+
     Program program;
     program.load_vertex_shader("shaders/vertex/cube-map.vert");
     program.load_fragment_shader("shaders/fragment/cube-map.frag");
     program.link();
 
     program.use();
+    program.set_uniform_integer("texture1", 0);
 
     Camera camera;
     camera.position.z = 1.5f;
@@ -587,6 +595,17 @@ void render_sphere_via_cube_map()
 
     glm::mat4 mvp(1.0f);
 
+    bool mouse_is_being_held_down = false;
+
+    double start_x_position = 0.0f;
+    double current_x_position = 0.0f;
+
+    double start_y_position = 0.0f;
+    double current_y_position = 0.0f;
+
+    float azimuth = 0.0f;
+    float elevation = 0.0f;
+
     while(no_signals_have_been_raised() && window.should_not_close())
     {
         // IO Logic
@@ -595,7 +614,63 @@ void render_sphere_via_cube_map()
         // Make sure tha the mouse events aren't happneing in the UI
         if(io.WantCaptureMouse == false)
         {
+            if(window.left_mouse_button_is_pressed())
+            {
+                if(mouse_is_being_held_down)
+                {
+                    // Azimuth rotations
+                    start_x_position = current_x_position;
+                    current_x_position = window.mouse_x_position();
 
+                    if(current_x_position - start_x_position >= 2.0f)
+                    {
+                        azimuth += 1.0f;
+                    }
+                    else if(current_x_position - start_x_position <= -2.0f)
+                    {
+                        azimuth -= 1.0f;
+                    }
+
+                    if(azimuth >= 360.0f || azimuth <= -360.0f)
+                    {
+                        azimuth = 0.0f;
+                    }
+
+                    // Take care of y rotations
+                    start_y_position = current_y_position;
+                    current_y_position = window.mouse_y_position();
+
+                    if((current_y_position - start_y_position >= 2.0f) && (elevation < 90.0f))
+                    {
+                        elevation += 1.0f;
+                    }
+                    else if((current_y_position - start_y_position <= -2.0f) && (elevation > -90.0f))
+                    {
+                        elevation -= 1.0f;
+                    }
+                }
+                else
+                {
+                    start_x_position = window.mouse_y_position();
+                    mouse_is_being_held_down = true;
+                }
+            }
+            else
+            {
+                mouse_is_being_held_down = false;
+            }
+        }
+
+        // Camera Logic
+        {
+            // Hypotenuse is at 1.25
+
+            // Angle is the elevation
+            camera.position.y = 1.5 * sin(elevation * (M_PI / 180.0f));
+
+            // Use the azimuth for this position
+            camera.position.x = 1.5 * cos(azimuth * (M_PI / 180.0f));
+            camera.position.z = 1.5 * sin(azimuth * (M_PI / 180.0f));
         }
 
         // UI Logic
@@ -616,6 +691,9 @@ void render_sphere_via_cube_map()
         // Render Logic
         window.clear_color(0.1f, 0.1f, 0.1f, 1.0f);
         window.clear_buffer_bits();
+
+        texture.set_active_texture(GL_TEXTURE0);
+        texture.bind();
 
         program.use();
 

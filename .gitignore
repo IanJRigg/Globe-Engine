@@ -3,4 +3,5 @@ build/
 doc/
 cmake_modules/
 lib/
-textures/
+textures
+*.ini

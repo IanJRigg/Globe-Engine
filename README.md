@@ -15,13 +15,18 @@ The following tools are used in conjunction with the project:
 
 
 ## TODOs
-- Create a camera class
-- Develop a subdivision surfaces algorithm
-- Develop a cube map algorithm
 - Develop a geographic grid algorithm
-- Make IMGUI look better? Better font, and some color theory would go far
+- Develop a subdivision surfaces algorithm
+- Come up with a quad? octo tree implementation for adjustable LOD
+- Figure out how to texture the damn cube
+- Figure out how to compress the face subdividing code
 - Make IMGUI Compile into a separate static lib
 - Make GLAD compile into a separate static lib
-- Find a texturing library that can be used to render the earth
-- Click and drag algorithm can be changed such that the camera is translating, not the globe. This can be used to adjust LOD as well
+-
+
+
+
+## Open Questions
+- Make IMGUI look better? Better font, and some color theory would go far
+- Find a texturing library that can be used to render the earth (BlueMarble?)
 - 

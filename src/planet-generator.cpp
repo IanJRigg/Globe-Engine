@@ -9,6 +9,7 @@ static const uint32_t TOP_FACE_START_INDEX    = 4UL;
 static const uint32_t BOTTOM_FACE_START_INDEX = 5UL;
 
 #include <iostream>
+#include <thread>
 
 /**********************************************************************************************//**
  * \brief
@@ -329,12 +330,19 @@ void generate_cube_with_subdivisions(std::vector<float>& vertices,
     vertices.resize(((vertices_per_side * vertices_per_side * 3) * 6), 0.0f);
     indices.resize((((vertices_per_side - 1) * (vertices_per_side - 1) * 6) * 6), 0UL);
 
-    generate_front_face(vertices, indices, vertices_per_side);
-    generate_back_face(vertices, indices, vertices_per_side);
-    generate_left_face(vertices, indices, vertices_per_side);
-    generate_right_face(vertices, indices, vertices_per_side);
-    generate_top_face(vertices, indices, vertices_per_side);
-    generate_bottom_face(vertices, indices, vertices_per_side);
+    std::thread front_thread(generate_front_face,   std::ref(vertices), std::ref(indices), vertices_per_side);
+    std::thread back_thread(generate_back_face,     std::ref(vertices), std::ref(indices), vertices_per_side);
+    std::thread left_thread(generate_left_face,     std::ref(vertices), std::ref(indices), vertices_per_side);
+    std::thread right_thread(generate_right_face,   std::ref(vertices), std::ref(indices), vertices_per_side);
+    std::thread top_thread(generate_top_face,       std::ref(vertices), std::ref(indices), vertices_per_side);
+    std::thread bottom_thread(generate_bottom_face, std::ref(vertices), std::ref(indices), vertices_per_side);
+
+    front_thread.join();
+    back_thread.join();
+    left_thread.join();
+    right_thread.join();
+    top_thread.join();
+    bottom_thread.join();
 }
 
 
