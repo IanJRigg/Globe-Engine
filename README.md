@@ -22,7 +22,7 @@ The following tools are used in conjunction with the project:
 - Figure out how to compress the face subdividing code
 - Make IMGUI Compile into a separate static lib
 - Make GLAD compile into a separate static lib
--
+- Implement the angular vertex optimization to the cube map algorithm
 
 
 

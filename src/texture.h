@@ -21,8 +21,8 @@ public:
 
     void load_cube_map_png(const std::string& path);
 
-    void bind_with_2D_texture_as_target() const;
-    void bind_with_cube_map_as_target() const;
+    void bind_with_2D_texture_as_target();
+    void bind_with_cube_map_as_target();
 
     void set_active_texture(const uint32_t texture_unit);
 
@@ -57,7 +57,7 @@ public:
     void set_mipmapping_to_linear_mipmap_linear();
 
 private:
-    void load(const std::string& path, const GLenum format);
+    void load(const std::string& path, const GLenum target, const GLenum format);
 
 private:
     GLuint m_id;

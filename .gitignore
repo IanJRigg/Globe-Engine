@@ -5,3 +5,4 @@ cmake_modules/
 lib/
 textures
 *.ini
+src/glad.c

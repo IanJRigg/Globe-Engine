@@ -541,7 +541,7 @@ void render_sphere_via_cube_map()
     window.enable_vsync();
     window.enable_depth_test();
     window.enable_backface_culling();
-    window.enable_wireframe();
+    //window.enable_wireframe();
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -583,7 +583,6 @@ void render_sphere_via_cube_map()
     program.set_uniform_integer("texture1", 0);
 
     Camera camera;
-    camera.position.z = 1.5f;
 
     glm::mat4 transformation(1.0f);
     glm::mat4 rotation(1.0f);

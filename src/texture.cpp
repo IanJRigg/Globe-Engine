@@ -70,7 +70,7 @@ void Texture::load_png(const std::string& path)
 void Texture::load_cube_map_png(const std::string& path)
 {
     this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_NGEATIVE_X, GL_RGBA);
+    this->load(path, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_RGBA);
     this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_RGBA);
     this->load(path, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_RGBA);
     this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_RGBA);
@@ -80,7 +80,7 @@ void Texture::load_cube_map_png(const std::string& path)
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-void Texture::bind_with_2D_texture_as_target() const
+void Texture::bind_with_2D_texture_as_target()
 {
     m_target = GL_TEXTURE_2D;
     glBindTexture(m_target, m_id);
@@ -89,7 +89,7 @@ void Texture::bind_with_2D_texture_as_target() const
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-void Texture::bind_with_cube_map_as_target() const
+void Texture::bind_with_cube_map_as_target()
 {
     m_target = GL_TEXTURE_CUBE_MAP;
     glBindTexture(m_target, m_id);
