@@ -370,8 +370,8 @@ void render_cube()
     mesh.load_index_buffer(cube_indices);
     mesh.set_vertex_buffer_attribute(0, 3, 0);
 
-    // Texture_2D texture;
-    // texture.bind();
+    // Texture texture;
+    // texture.bind_with_2D_texture_as_target();
     // texture.load_jpg("textures/container.jpg");
     // texture.set_s_axis_to_repeat();
     // texture.set_t_axis_to_repeat();
@@ -640,11 +640,11 @@ void render_sphere_via_cube_map()
                     start_y_position = current_y_position;
                     current_y_position = window.mouse_y_position();
 
-                    if((current_y_position - start_y_position >= 2.0f) && (elevation < 90.0f))
+                    if((current_y_position - start_y_position >= 2.0f) && (elevation < 80.0f))
                     {
                         elevation += 1.0f;
                     }
-                    else if((current_y_position - start_y_position <= -2.0f) && (elevation > -90.0f))
+                    else if((current_y_position - start_y_position <= -2.0f) && (elevation > -80.0f))
                     {
                         elevation -= 1.0f;
                     }
@@ -663,14 +663,13 @@ void render_sphere_via_cube_map()
 
         // Camera Logic
         {
-            // Hypotenuse is at 1.25
-
             // Angle is the elevation
             camera.position.y = 1.5 * sin(elevation * (M_PI / 180.0f));
+            float horizontal_hypotenuse = 1.5 * cos(elevation * (M_PI / 180.0f));
 
             // Use the azimuth for this position
-            camera.position.x = 1.5 * cos(azimuth * (M_PI / 180.0f));
-            camera.position.z = 1.5 * sin(azimuth * (M_PI / 180.0f));
+            camera.position.x = horizontal_hypotenuse * cos(azimuth * (M_PI / 180.0f));
+            camera.position.z = horizontal_hypotenuse * sin(azimuth * (M_PI / 180.0f));
         }
 
         // UI Logic
@@ -692,8 +691,8 @@ void render_sphere_via_cube_map()
         window.clear_color(0.1f, 0.1f, 0.1f, 1.0f);
         window.clear_buffer_bits();
 
-        texture.set_active_texture(GL_TEXTURE0);
-        texture.bind();
+        // texture.set_active_texture(GL_TEXTURE0);
+        // texture.bind();
 
         program.use();
 
