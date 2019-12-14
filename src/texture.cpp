@@ -67,14 +67,19 @@ void Texture::load_png(const std::string& path)
  * \brief
  * \param path
  *************************************************************************************************/
-void Texture::load_cube_map_png(const std::string& path)
+void Texture::load_cube_map_png(const std::vector<std::string>& paths)
 {
-    this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_RGBA);
-    this->load(path, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_RGBA);
+    if(paths.size() != 6UL)
+    {
+        return;
+    }
+
+    this->load(paths.at(0UL), GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_RGB);
+    this->load(paths.at(1UL), GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_RGB);
+    this->load(paths.at(2UL), GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_RGB);
+    this->load(paths.at(3UL), GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_RGB);
+    this->load(paths.at(4UL), GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_RGB);
+    this->load(paths.at(5UL), GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_RGB);
 }
 
 /**********************************************************************************************//**
@@ -276,7 +281,7 @@ void Texture::load(const std::string& path, const GLenum target, const GLenum fo
     int height = 0L;
     int nrChannels = 0L;
 
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     if(data != nullptr)
     {

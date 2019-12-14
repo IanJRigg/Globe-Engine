@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <string>
+#include <vector>
 
 class Texture
 {
@@ -19,7 +20,7 @@ public:
     void load_jpg(const std::string& path);
     void load_png(const std::string& path);
 
-    void load_cube_map_png(const std::string& path);
+    void load_cube_map_png(const std::vector<std::string>& paths);
 
     void bind_with_2D_texture_as_target();
     void bind_with_cube_map_as_target();

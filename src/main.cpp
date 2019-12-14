@@ -349,7 +349,7 @@ void render_cube()
     Window window("Render Cube", 768UL, 1280UL);
     window.enable_vsync();
     window.enable_depth_test();
-    //window.enable_wireframe();
+    window.enable_wireframe();
     window.enable_backface_culling();
 
     // IMGUI_CHECKVERSION();
@@ -535,6 +535,16 @@ void render_cube()
     ImGui::DestroyContext();
 }
 
+std::vector<std::string> globe_faces
+{
+    "textures/bm/right.png",
+    "textures/bm/left.png",
+    "textures/bm/top.png",
+    "textures/bm/bottom.png",
+    "textures/bm/front.png",
+    "textures/bm/back.png"
+};
+
 void render_sphere_via_cube_map()
 {
     Window window("Cube Map Sphere", 1534UL, 2048UL);
@@ -567,7 +577,7 @@ void render_sphere_via_cube_map()
 
     Texture texture;
     texture.bind_with_cube_map_as_target();
-    texture.load_cube_map_png("textures/awesomeface.png");
+    texture.load_cube_map_png(globe_faces);
     texture.set_magnifying_filter_to_linear();
     texture.set_minifying_filter_to_linear();
     texture.set_s_axis_to_clamp_to_edge();
@@ -590,6 +600,7 @@ void render_sphere_via_cube_map()
 
     glm::mat4 model(1.0f);
     glm::mat4 view = camera.look_at();
+    //glm::mat4 projection = glm::ortho(-1.5f, 1.5f, -1.125f, 1.125f, -2.0f, 2.0f);
     glm::mat4 projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
 
     glm::mat4 mvp(1.0f);
@@ -604,6 +615,15 @@ void render_sphere_via_cube_map()
 
     float azimuth = 0.0f;
     float elevation = 0.0f;
+
+    float fov = 0.0f;
+
+    float near = 0.1f;
+    float far = 100.0f;
+
+    float hypotenuse = 2.0f;
+
+    bool button_is_toggled = false;
 
     while(no_signals_have_been_raised() && window.should_not_close())
     {
@@ -660,17 +680,6 @@ void render_sphere_via_cube_map()
             }
         }
 
-        // Camera Logic
-        {
-            // Angle is the elevation
-            camera.position.y = 1.5 * sin(elevation * (M_PI / 180.0f));
-            float horizontal_hypotenuse = 1.5 * cos(elevation * (M_PI / 180.0f));
-
-            // Use the azimuth for this position
-            camera.position.x = horizontal_hypotenuse * cos(azimuth * (M_PI / 180.0f));
-            camera.position.z = horizontal_hypotenuse * sin(azimuth * (M_PI / 180.0f));
-        }
-
         // UI Logic
         {
             ImGui_ImplOpenGL3_NewFrame();
@@ -683,11 +692,47 @@ void render_sphere_via_cube_map()
             ImGui::SliderFloat("Y Position", &camera.position.y, -10.0f, 10.0f);
             ImGui::SliderFloat("Z Position", &camera.position.z, -10.0f, 10.0f);
 
+            ImGui::SliderFloat("FOV", &fov, 0.0f, 180.0f);
+
+            ImGui::SliderFloat("Near", &near, 0.0f, 1.0f);
+            ImGui::SliderFloat("Far", &far, 0.0f, 100.0f);
+
+            ImGui::SliderFloat("Hypotenuse", &hypotenuse, 1.0f, 2.0f);
+
+            ImGui::Button("Toggle me!");
+
+            if(ImGui::IsItemClicked(0))
+            {
+                button_is_toggled = !button_is_toggled;
+            }
+
+            if(button_is_toggled)
+            {
+                camera.set_fov(fov);
+                projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), near, far);
+
+            }
+            else
+            {
+                projection = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -2.0f, 2.0f);
+            }
+
             ImGui::End();
         }
 
+        // Camera Logic
+        {
+            // Angle is the elevation
+            camera.position.y = hypotenuse * sin(elevation * (M_PI / 180.0f));
+            float horizontal_hypotenuse = hypotenuse * cos(elevation * (M_PI / 180.0f));
+
+            // Use the azimuth for this position
+            camera.position.x = horizontal_hypotenuse * cos(azimuth * (M_PI / 180.0f));
+            camera.position.z = horizontal_hypotenuse * sin(azimuth * (M_PI / 180.0f));
+        }
+
         // Render Logic
-        window.clear_color(0.1f, 0.1f, 0.1f, 1.0f);
+        window.clear_color(0.9f, 0.9f, 0.9f, 1.0f);
         window.clear_buffer_bits();
 
         // texture.set_active_texture(GL_TEXTURE0);
@@ -696,7 +741,8 @@ void render_sphere_via_cube_map()
         program.use();
 
         view = camera.look_at();
-        projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), 0.1f, 100.0f);
+        //projection = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -2.0f, 2.0f);
+        //projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), near, far);
 
         model = transformation * rotation * scale;
         mvp = projection * view * model;
