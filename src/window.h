@@ -22,6 +22,8 @@ public:
 
     // Accessors
     float aspect_ratio() const;
+    int height() const;
+    int width() const;
 
     // Input Functions
     void poll_input();

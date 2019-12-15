@@ -12,7 +12,9 @@ static const glm::vec3 Y_AXIS(0.0f, 1.0f, 0.0f);
 Camera::Camera() :
     position(0.0f, 0.0f, 0.0f),
     rotation(0.0f, 0.0f, 0.0f),
-    m_fov(90.0f)
+    m_fov(90.0f),
+    m_distance_to_near_plane(0.0f),
+    m_distance_to_far_plane(0.0f)
 {
 
 }
@@ -31,7 +33,9 @@ Camera::~Camera()
 Camera::Camera(const Camera& other) :
     position(other.position),
     rotation(other.rotation),
-    m_fov(other.m_fov)
+    m_fov(other.m_fov),
+    m_distance_to_near_plane(0.0f),
+    m_distance_to_far_plane(0.0f)
 {
 
 }
@@ -54,6 +58,8 @@ Camera& Camera::operator=(const Camera& other)
         position = other.position;
         rotation = other.rotation;
         m_fov = other.m_fov;
+        m_distance_to_near_plane = other.m_distance_to_near_plane;
+        m_distance_to_far_plane  = other.m_distance_to_far_plane;
     }
 
     return *this;
@@ -70,6 +76,8 @@ Camera& Camera::operator=(Camera&& other) noexcept
         rotation = std::move(other.rotation);
 
         std::swap(m_fov, other.m_fov);
+        std::swap(m_distance_to_near_plane, other.m_distance_to_near_plane);
+        std::swap(m_distance_to_far_plane,  other.m_distance_to_far_plane);
     }
 
     return *this;
@@ -78,7 +86,7 @@ Camera& Camera::operator=(Camera&& other) noexcept
 /**********************************************************************************************//**
  * \brief
  *************************************************************************************************/
-glm::mat4 Camera::look_at() const
+glm::mat4 Camera::view_matrix() const
 {
     glm::vec3 direction = glm::normalize(position - ORIGIN);
     glm::vec3 right = glm::normalize(glm::cross(Y_AXIS, direction));
@@ -88,6 +96,20 @@ glm::mat4 Camera::look_at() const
         position,
         glm::vec3(0.0f, 0.0f, 0.0f), // position + front
         up
+    );
+}
+
+/**********************************************************************************************//**
+ * \brief
+ * \param aspect_ratio
+ *************************************************************************************************/
+glm::mat4 Camera::projection_matrix(const float aspect_ratio) const
+{
+    return glm::perspective(
+        glm::radians(m_fov),
+        aspect_ratio,
+        m_distance_to_near_plane,
+        m_distance_to_far_plane
     );
 }
 
@@ -109,4 +131,38 @@ void Camera::set_fov(const float fov)
 float Camera::fov() const
 {
    return m_fov;
+}
+
+/**********************************************************************************************//**
+ * \brief
+ * \param distance
+ *************************************************************************************************/
+void Camera::set_distance_to_near_plane(const float distance)
+{
+    m_distance_to_near_plane = distance;
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+float Camera::distance_to_near_plane() const
+{
+    return m_distance_to_near_plane;
+}
+
+/**********************************************************************************************//**
+ * \brief
+ * \param distance
+ *************************************************************************************************/
+void Camera::set_distance_to_far_plane(const float distance)
+{
+    m_distance_to_far_plane = distance;
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+float Camera::distance_to_far_plane() const
+{
+    return m_distance_to_far_plane;
 }

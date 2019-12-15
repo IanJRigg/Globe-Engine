@@ -267,6 +267,8 @@ void render_sphere_via_cube_map()
     program.set_uniform_integer("texture1", 0);
 
     Camera camera;
+    camera.set_distance_to_near_plane(0.1f);
+    camera.set_distance_to_far_plane(10.0f);
 
     glm::mat4 transformation(1.0f);
     glm::mat4 rotation(1.0f);

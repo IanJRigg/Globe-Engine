@@ -15,10 +15,17 @@ public:
     Camera& operator=(const Camera& other);
     Camera& operator=(Camera&& other) noexcept;
 
-    glm::mat4 look_at() const;
+    glm::mat4 view_matrix() const;
+    glm::mat4 projection_matrix(const float aspect_ratio) const;
 
     void set_fov(const float zoom);
     float fov() const;
+
+    void set_distance_to_near_plane(const float distance);
+    float distance_to_near_plane() const;
+
+    void set_distance_to_far_plane(const float distance);
+    float distance_to_far_plane() const;
 
 private:
 
@@ -28,6 +35,8 @@ public:
 
 private:
     float m_fov;
+    float m_distance_to_near_plane;
+    float m_distance_to_far_plane;
 };
 
 #endif
