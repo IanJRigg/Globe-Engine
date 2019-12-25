@@ -198,6 +198,7 @@ static void setup_signal_handlers()
 #include "camera.h"
 #include "planet-generator.h"
 #include "program.h"
+#include "raycaster.h"
 #include "texture.h"
 #include "mesh.h"
 #include "window.h"
@@ -211,12 +212,12 @@ static void setup_signal_handlers()
 
 std::vector<std::string> globe_faces
 {
-    "textures/bm/right.png",
-    "textures/bm/left.png",
-    "textures/bm/top.png",
-    "textures/bm/bottom.png",
-    "textures/bm/front.png",
-    "textures/bm/back.png"
+    "textures/political/right.png",
+    "textures/political/left.png",
+    "textures/political/top.png",
+    "textures/political/bottom.png",
+    "textures/political/front.png",
+    "textures/political/back.png"
 };
 
 void render_sphere_via_cube_map()
@@ -276,7 +277,6 @@ void render_sphere_via_cube_map()
 
     glm::mat4 model(1.0f);
     glm::mat4 view = camera.view_matrix();
-    //glm::mat4 projection = glm::ortho(-1.5f, 1.5f, -1.125f, 1.125f, -2.0f, 2.0f);
     glm::mat4 projection = camera.projection_matrix(window.aspect_ratio());
 
     glm::mat4 mvp(1.0f);
@@ -292,7 +292,7 @@ void render_sphere_via_cube_map()
     float azimuth = 0.0f;
     float elevation = 0.0f;
 
-    float fov = 0.0f;
+    float fov = 90.0f;
 
     float near = 0.1f;
     float far = 100.0f;
@@ -311,6 +311,13 @@ void render_sphere_via_cube_map()
         {
             if(window.left_mouse_button_is_pressed())
             {
+                glm::vec3 ray = screen_position_to_ray(window, camera);
+                glm::vec3 point_on_sphere = instersection_of_ray_with_sphere(ray, camera.position);
+
+                std::cout << "Longitude: " << asin(point_on_sphere.y) * (180.0f / M_PI) << std::endl;
+                std::cout << "Latitude: " << atan(point_on_sphere.x / point_on_sphere.z) * (180.0f / M_PI) << std::endl;
+                std::cout << std::endl;
+
                 if(mouse_is_being_held_down)
                 {
                     // Azimuth rotations
@@ -375,24 +382,6 @@ void render_sphere_via_cube_map()
 
             ImGui::SliderFloat("Hypotenuse", &hypotenuse, 1.0f, 5.0f);
 
-            ImGui::Button("Toggle me!");
-
-            if(ImGui::IsItemClicked(0))
-            {
-                button_is_toggled = !button_is_toggled;
-            }
-
-            if(button_is_toggled)
-            {
-                camera.set_fov(fov);
-                projection = camera.projection_matrix(window.aspect_ratio());
-
-            }
-            else
-            {
-                projection = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -2.0f, 2.0f);
-            }
-
             ImGui::End();
         }
 
@@ -416,9 +405,10 @@ void render_sphere_via_cube_map()
 
         program.use();
 
+        camera.set_fov(fov);
+
         view = camera.view_matrix();
-        //projection = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -2.0f, 2.0f);
-        //projection = glm::perspective(glm::radians(camera.fov()), window.aspect_ratio(), near, far);
+        projection = camera.projection_matrix(window.aspect_ratio());
 
         model = transformation * rotation * scale;
         mvp = projection * view * model;

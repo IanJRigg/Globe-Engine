@@ -16,6 +16,7 @@ public:
     Camera& operator=(Camera&& other) noexcept;
 
     glm::mat4 view_matrix() const;
+    glm::mat3 view_matrix_at_origin() const;
     glm::mat4 projection_matrix(const float aspect_ratio) const;
 
     void set_fov(const float zoom);

@@ -92,11 +92,19 @@ glm::mat4 Camera::view_matrix() const
     glm::vec3 right = glm::normalize(glm::cross(Y_AXIS, direction));
     glm::vec3 up = glm::cross(direction, right);
 
-    return glm::lookAt(
-        position,
-        glm::vec3(0.0f, 0.0f, 0.0f), // position + front
-        up
-    );
+    return glm::lookAt(position, ORIGIN, up);
+}
+
+/**********************************************************************************************//**
+ * \brief
+ *************************************************************************************************/
+glm::mat3 Camera::view_matrix_at_origin() const
+{
+    glm::vec3 direction = glm::normalize(position - ORIGIN);
+    glm::vec3 right = glm::normalize(glm::cross(Y_AXIS, direction));
+    glm::vec3 up = glm::cross(direction, right);
+
+    return glm::lookAt(glm::vec3(0.0f), ORIGIN, up);
 }
 
 /**********************************************************************************************//**

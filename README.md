@@ -15,7 +15,6 @@ The following tools are used in conjunction with the project:
 
 
 ## TODOs in order of priority
-- Implement Latitude/Longitude and potentially WGS84 support
 - Implement the angular vertex optimization to the cube map algorithm
 - Come up with a quad? octo? tree implementation for adjustable LOD
 - Figure out how to compress the face subdividing code
